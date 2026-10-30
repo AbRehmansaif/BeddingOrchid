@@ -9,12 +9,20 @@ def site_context(request):
     settings_obj = SiteSettings.get_settings()
 
     # Cached category tree for navigation / mega-menu
-    categories_tree = cache.get('nav_categories_tree')
+    categories_tree = None
+    try:
+        categories_tree = cache.get('nav_categories_tree')
+    except Exception:
+        categories_tree = None
+
     if categories_tree is None:
         try:
             from apps.catalog.models import Category
-            categories_tree = Category.objects.filter(is_active=True, show_in_menu=True, parent__isnull=True).prefetch_related('children')
-            cache.set('nav_categories_tree', list(categories_tree), timeout=3600)
+            categories_tree = list(Category.objects.filter(is_active=True, show_in_menu=True, parent__isnull=True).prefetch_related('children'))
+            try:
+                cache.set('nav_categories_tree', categories_tree, timeout=3600)
+            except Exception:
+                pass
         except Exception:
             categories_tree = []
 
