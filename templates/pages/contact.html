@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center max-w-xl mx-auto mb-10">
+        <h1 class="text-3xl sm:text-4xl font-serif font-bold text-navy">Get in Touch</h1>
+        <p class="text-xs text-stone-500 mt-2">Have a question about bed sheet sizes, fabrics, or order status? Our bedding specialists are ready to assist you.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        
+        <!-- Contact Information (5 cols) -->
+        <div class="md:col-span-5 bg-navy text-stone-200 p-8 rounded-3xl space-y-6 shadow-xl">
+            <h3 class="font-serif font-bold text-xl text-white">Contact Info</h3>
+            
+            <div class="space-y-4 text-xs">
+                <div>
+                    <span class="text-sand font-bold block mb-1">WhatsApp & Call Support:</span>
+                    <a href="{{ WHATSAPP_CHAT_URL }}" target="_blank" class="text-white text-sm font-semibold hover:underline">
+                        {{ site_settings.phone }}
+                    </a>
+                    <span class="block text-stone-400 mt-0.5">Mon - Sat: 10:00 AM - 8:00 PM</span>
+                </div>
+
+                <div>
+                    <span class="text-sand font-bold block mb-1">Email Support:</span>
+                    <a href="mailto:{{ site_settings.email }}" class="text-white hover:underline">
+                        {{ site_settings.email }}
+                    </a>
+                </div>
+
+                <div>
+                    <span class="text-sand font-bold block mb-1">Textile Mill & Warehouse:</span>
+                    <p class="text-stone-300 leading-relaxed">{{ site_settings.address }}</p>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-stone-800">
+                <a href="{{ WHATSAPP_CHAT_URL }}" target="_blank" class="block text-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-md">
+                    💬 Chat Directly on WhatsApp &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Contact Form (7 cols) -->
+        <div class="md:col-span-7 bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+            <h3 class="font-serif font-bold text-lg text-navy mb-4 border-b border-stone-100 pb-2">Send Us a Message</h3>
+            <form action="{% url 'pages:contact' %}" method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Your Name *</label>
+                        <input type="text" name="name" required placeholder="e.g. Fatima Ahmed" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Mobile Phone *</label>
+                        <input type="tel" name="phone" required placeholder="03001234567" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Email Address</label>
+                    <input type="email" name="email" placeholder="you@example.com" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Subject</label>
+                    <input type="text" name="subject" placeholder="Inquiry about Bed Sheet sizes or COD" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Message *</label>
+                    <textarea name="message" rows="4" required placeholder="How can we help you?" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-navy hover:bg-terracotta text-white font-bold py-3.5 px-6 rounded-xl text-xs transition shadow-md">
+                    Send Message &rarr;
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

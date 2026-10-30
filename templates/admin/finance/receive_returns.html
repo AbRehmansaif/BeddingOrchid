@@ -1,0 +1,276 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Receive Returns & Scan Station{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  :root {
+    --fin-bg: #0F172A;
+    --fin-surface: #1E293B;
+    --fin-border: #334155;
+    --fin-text: #E2E8F0;
+    --fin-muted: #94A3B8;
+    --fin-accent: #6366F1;
+    --fin-green: #10B981;
+    --fin-red: #EF4444;
+  }
+  .scan-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .scan-card {
+    background: var(--fin-surface);
+    border: 1px solid var(--fin-border);
+    border-radius: 12px;
+    padding: 24px;
+    color: var(--fin-text);
+    margin-bottom: 24px;
+  }
+  .scan-input-group {
+    display: flex;
+    gap: 12px;
+  }
+  .scan-input {
+    flex: 1;
+    background: #0F172A;
+    border: 2px solid var(--fin-accent);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 18px;
+    border-radius: 8px;
+    font-family: monospace;
+    outline: none;
+  }
+  .scan-input:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+  }
+  .scan-btn {
+    background: var(--fin-accent);
+    color: white;
+    border: none;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-delivered { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+  .badge-returned { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+  .badge-dispatched { background: rgba(6, 182, 212, 0.2); color: #06B6D4; }
+  table.fin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  table.fin-table th {
+    background: #0F172A;
+    color: var(--fin-muted);
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--fin-border);
+  }
+  table.fin-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--fin-border);
+    vertical-align: middle;
+  }
+  .select-box, .num-box {
+    background: #0F172A;
+    border: 1px solid var(--fin-border);
+    color: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .confirm-btn {
+    background: var(--fin-green);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+      <h1 style="font-size: 24px; font-weight: 800; color: #1E293B; margin: 0;">📦 Returns & RTO Scan Station</h1>
+      <p style="color: #64748B; margin: 4px 0 0 0; font-size: 13px;">Scan parcel barcodes to receive returned items, log damage write-offs, and update inventory & financials in 1 step.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="{% url 'admin:finance_dashboard' %}" class="button" style="background: #1E293B; color: #fff;">← Finance Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="scan-card">
+    <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fin-muted); display: block; margin-bottom: 8px; font-weight: 700;">
+      🔍 Scan Barcode or Type Tracking Number / Order #
+    </label>
+    <form method="get" class="scan-input-group">
+      <input type="text" name="q" value="{{ query }}" class="scan-input" autofocus placeholder="e.g. 78491823901 or ORD-10024" id="barcode-input">
+      <button type="submit" class="scan-btn">Lookup Parcel</button>
+    </form>
+  </div>
+
+  {% if order %}
+  <!-- Order Found Panel -->
+  <div class="scan-card" style="border-left: 4px solid var(--fin-accent);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--fin-border); padding-bottom: 12px;">
+      <div>
+        <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 6px 0;">
+          Order #{{ order.order_number }}
+          <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+        </h2>
+        <div style="font-size: 13px; color: var(--fin-muted);">
+          Customer: <strong style="color: #fff;">{{ order.customer_name }}</strong> ({{ order.shipping_city }}) •
+          Courier: <strong style="color: #fff;">{{ order.courier|default:"Unassigned" }}</strong> •
+          Tracking: <strong style="font-family: monospace; color: #38BDF8;">{{ order.tracking_number|default:"-" }}</strong>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 11px; color: var(--fin-muted); text-transform: uppercase;">Order Total</div>
+        <div style="font-size: 20px; font-weight: 800; color: #fff;">Rs. {{ order.grand_total:,.2f }}</div>
+      </div>
+    </div>
+
+    <!-- Return Processing Form -->
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="order_id" value="{{ order.id }}">
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+        <div>
+          <label style="font-size: 11px; text-transform: uppercase; color: var(--fin-muted); display: block; margin-bottom: 4px;">Return Reason</label>
+          <select name="reason" class="select-box" style="width: 100%;">
+            <option value="refused">Refused at Door (RTO)</option>
+            <option value="customer_return">Customer Return / Exchange</option>
+            <option value="damaged">Damaged in Transit</option>
+            <option value="wrong_item">Wrong Item Sent</option>
+            <option value="not_delivered">Could Not Deliver / Address Incomplete</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11px; text-transform: uppercase; color: var(--fin-muted); display: block; margin-bottom: 4px;">Courier Return Charge (Rs)</label>
+          <input type="number" step="0.01" name="return_charge" value="{{ default_return_charge }}" class="num-box" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; text-transform: uppercase; color: var(--fin-muted); display: block; margin-bottom: 4px;">Refund Amount (if non-COD)</label>
+          <input type="number" step="0.01" name="refund_amount" value="0.00" class="num-box" style="width: 100%;">
+        </div>
+      </div>
+
+      <h3 style="font-size: 14px; font-weight: 700; color: #fff; margin: 16px 0 8px 0;">Items in Parcel</h3>
+      <table class="fin-table">
+        <thead>
+          <tr>
+            <th>Item &amp; SKU</th>
+            <th>Ordered Qty</th>
+            <th>Return Qty</th>
+            <th>Condition / Inventory Action</th>
+            <th>Restock to Stock?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: #fff;">{{ item.product_name }}</div>
+              <div style="font-size: 11px; color: var(--fin-muted);">{{ item.variant_sku }} • {{ item.size_name }} / {{ item.color_name }}</div>
+            </td>
+            <td>{{ item.quantity }}</td>
+            <td>
+              <input type="number" name="qty_{{ item.id }}" value="{{ item.quantity }}" min="0" max="{{ item.quantity }}" class="num-box" style="width: 70px;">
+            </td>
+            <td>
+              <select name="condition_{{ item.id }}" class="select-box">
+                <option value="sellable">✓ Sellable (Like New / Restockable)</option>
+                <option value="damaged">⚠️ Damaged / Defective (Write-off)</option>
+                <option value="refurbishable">🔄 Refurbishable / Second Quality</option>
+                <option value="lost">❌ Lost in Transit</option>
+              </select>
+            </td>
+            <td>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" name="restock_{{ item.id }}" checked style="transform: scale(1.2);">
+                <span style="font-size: 12px; color: var(--fin-muted);">Restock Quantity</span>
+              </label>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <button type="submit" class="confirm-btn">✓ Confirm &amp; Process Return Parcel</button>
+    </form>
+  </div>
+  {% elif query %}
+  <div class="scan-card" style="text-align: center; padding: 40px;">
+    <div style="font-size: 32px; margin-bottom: 10px;">🔍</div>
+    <h3 style="color: #fff; margin-bottom: 6px;">No Order Found for "{{ query }}"</h3>
+    <p style="color: var(--fin-muted); font-size: 13px;">Check that the tracking number or order number was typed correctly, or scan the parcel shipping label again.</p>
+  </div>
+  {% endif %}
+
+  <!-- Recent Returns Table -->
+  <div class="scan-card">
+    <h3 style="font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 14px 0;">🕒 Recent Returns Logged Today</h3>
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Tracking</th>
+          <th>Reason</th>
+          <th>Items Returned</th>
+          <th>Damaged Loss</th>
+          <th>Return Charge</th>
+          <th>Logged At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ret in recent_returns %}
+        <tr>
+          <td>
+            <a href="{% url 'admin:orders_order_change' ret.order.id %}" style="color: #38BDF8; font-weight: 600; text-decoration: none;">
+              #{{ ret.order.order_number }}
+            </a>
+          </td>
+          <td style="font-family: monospace;">{{ ret.order.tracking_number|default:"-" }}</td>
+          <td>{{ ret.get_reason_display }}</td>
+          <td>{{ ret.items.count }} item(s)</td>
+          <td style="color: #F87171;">Rs. {{ ret.damage_cost:,.2f }}</td>
+          <td>Rs. {{ ret.courier_return_charge:,.2f }}</td>
+          <td style="color: var(--fin-muted); font-size: 12px;">{{ ret.created_at|date:"H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align: center; color: var(--fin-muted); padding: 20px;">
+            No returns processed today yet. Scan a parcel above to start.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

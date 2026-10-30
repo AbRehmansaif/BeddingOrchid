@@ -1,0 +1,586 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ site_settings.store_name }} — Luxury Bedding, Bedsheets & Comforters Pakistan{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Banner Slider -->
+<!-- 1. Hero Section: Modern Split Bedding Showcase with Dynamic Backend Categories & Admin Controls -->
+<section class="relative bg-gradient-to-b from-[#FAF7F2] via-[#F5EFE6] to-[#EFE7DC] border-b border-sand/80 overflow-hidden">
+    <!-- Ambient luxury background glow accents -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-amber-100/60 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 -right-32 w-[30rem] h-[30rem] bg-terracotta/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            <!-- LEFT COLUMN: Value Proposition, Copy, Action CTAs & Dynamic Backend Categories -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Social Proof & Customer Trust Pill -->
+                <div class="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-sand/90 shadow-sm text-xs text-navy">
+                    <span class="flex text-amber-500 text-xs">
+                        ★ ★ ★ ★ ★
+                    </span>
+                    <span class="font-bold text-stone-900">4.9/5</span>
+                    <span class="text-stone-300">|</span>
+                    <span class="text-stone-600 font-medium">Export Grade Quality Across Pakistan</span>
+                </div>
+
+                <!-- Collection / Season Badge (Manageable from Admin) -->
+                <div class="flex items-center space-x-2">
+                    <span class="inline-block bg-terracotta text-white text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
+                        {% if banners and banners.first.badge_text %}{{ banners.first.badge_text }}{% else %}2026 SUMMER COLLECTION • EXPORT QUALITY{% endif %}
+                    </span>
+                    <span class="text-xs font-semibold text-stone-500 uppercase tracking-wider hidden sm:inline-block">
+                        Twiltex Global Standards Since 2004
+                    </span>
+                </div>
+
+                <!-- Main Editorial & SEO Headline -->
+                <h1 class="text-3xl sm:text-5xl lg:text-[52px] font-serif font-bold text-navy leading-[1.15] tracking-tight">
+                    {% if banners and banners.first.title %}
+                        {{ banners.first.title }}
+                    {% else %}
+                        Export-Quality Hotel Bedding.<br />
+                        <span class="relative inline-block text-terracotta">
+                            Direct From The Manufacturer.
+                            <svg class="absolute -bottom-1 sm:-bottom-2 left-0 w-full text-terracotta/30 h-2 sm:h-3" viewBox="0 0 100 12" preserveAspectRatio="none">
+                                <path d="M0,8 Q50,0 100,8" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                    {% endif %}
+                </h1>
+
+                <!-- Subtitle / Value & SEO Explanation (Twiltex exporter since 2004, not handcrafted) -->
+                <div class="text-base sm:text-lg text-stone-700 font-light leading-relaxed max-w-xl space-y-2">
+                    {% if banners and banners.first.subtitle %}
+                        <p>{{ banners.first.subtitle }}</p>
+                    {% else %}
+                        <p>
+                            Manufactured by <strong class="font-semibold text-navy">Twiltex</strong> (<a href="https://www.twiltex.com" target="_blank" rel="noopener" class="underline decoration-terracotta hover:text-terracotta font-medium">twiltex.com</a>) — global textile manufacturers &amp; international exporters since 2004.
+                        </p>
+                        <p class="text-sm sm:text-base text-stone-600">
+                            We supply 5-star hospitality chains across Europe and the USA. No synthetic shortcuts, no middlemen — genuine institutional-grade cotton bed sheets, duvet covers, and comforters delivered directly to your doorstep with zero compromise on fabric density and wash durability.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- CTA Action Buttons (Link & Product manageable from Admin) -->
+                <div class="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
+                    <a href="{% if banners and banners.first.effective_button_link %}{{ banners.first.effective_button_link }}{% elif banners and banners.first.button_link %}{{ banners.first.button_link }}{% else %}/collections/bed-sheets/{% endif %}" class="inline-flex items-center justify-center bg-terracotta hover:bg-[#a84c2a] text-white font-bold px-7 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 group">
+                        <span>{% if banners and banners.first.button_text %}{{ banners.first.button_text }}{% else %}Shop Bed Sheets{% endif %}</span>
+                        <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </a>
+                    <a href="{% url 'pages:detail' slug='size-guide' %}" class="inline-flex items-center justify-center bg-white hover:bg-stone-50 text-navy font-semibold px-6 py-3.5 rounded-xl border border-stone-300 shadow-sm hover:shadow transition-all duration-300">
+                        <svg class="w-4 h-4 mr-2 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M3 12h18M3 18h18" />
+                        </svg>
+                        <span>Size & Fit Guide</span>
+                    </a>
+                </div>
+
+                <!-- "WHAT WE SELL" Dynamic Category Navigation (Populated directly from Backend DB) -->
+                <div class="pt-4 border-t border-sand/70">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Shop by Bedding Category:</span>
+                        <a href="/collections/bed-sheets/" class="text-xs font-semibold text-terracotta hover:underline">View All Collections &rarr;</a>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        {% for cat in categories %}
+                        <a href="{{ cat.get_absolute_url }}" class="inline-flex items-center space-x-1.5 bg-white/90 hover:bg-white text-navy text-xs font-semibold px-3.5 py-2 rounded-xl border border-stone-200/90 shadow-sm hover:border-terracotta hover:text-terracotta hover:shadow transition-all">
+                            <span>{{ cat.name }}</span>
+                        </a>
+                        {% empty %}
+                        <a href="/collections/bed-sheets/" class="inline-flex items-center space-x-1.5 bg-white/90 hover:bg-white text-navy text-xs font-semibold px-3.5 py-2 rounded-xl border border-stone-200/90 shadow-sm">
+                            <span>Bed Sheets</span>
+                        </a>
+                        <a href="/collections/duvet-quilt-covers/" class="inline-flex items-center space-x-1.5 bg-white/90 hover:bg-white text-navy text-xs font-semibold px-3.5 py-2 rounded-xl border border-stone-200/90 shadow-sm">
+                            <span>Duvet Covers</span>
+                        </a>
+                        <a href="/collections/comforters-quilts/" class="inline-flex items-center space-x-1.5 bg-white/90 hover:bg-white text-navy text-xs font-semibold px-3.5 py-2 rounded-xl border border-stone-200/90 shadow-sm">
+                            <span>Comforters & Quilts</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Instant Trust Highlights -->
+                <div class="grid grid-cols-3 gap-2 pt-2 text-xs text-stone-600 font-medium">
+                    <div class="flex items-center space-x-1.5">
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Exported Since 2004</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Zero Pilling & Colorfast</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Nationwide COD</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Luxury Bedroom Showcase (Thread count removed, product & discount manageable from Admin) -->
+            <div class="lg:col-span-5 relative">
+                <!-- Decorative Layered Backdrop Glow -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-terracotta/20 to-amber-200/30 rounded-3xl transform rotate-1 scale-[1.02] filter blur-sm"></div>
+                
+                <div class="relative bg-stone-900 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/80 aspect-[4/3] sm:aspect-[16/11]">
+                    
+                    <!-- Bedding Image with cache-busting to prevent browser stale cache -->
+                    {% if banners and banners.first.image_desktop %}
+                    <img src="{{ banners.first.image_desktop.url }}?v={{ banners.first.updated_at|date:'U' }}" alt="Export Quality Hotel Bedding Twiltex" class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700 ease-out" />
+                    {% else %}
+                    <img src="{% static 'images/hero-bedding-luxury.jpg' %}" alt="Export Quality Hotel Bedding Twiltex" class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700 ease-out" />
+                    {% endif %}
+
+                    <!-- Subtle dark vignette gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-black/10 pointer-events-none"></div>
+
+                    <!-- Floating Quality Badge (Thread Count removed per request) -->
+                    <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl px-3 py-2 shadow-lg border border-white/50 flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-navy">Twiltex Certified • Since 2004</span>
+                    </div>
+
+                    <!-- Floating Product Card (Selected directly from Admin) -->
+                    {% if banners and banners.first.featured_product %}
+                    <a href="{{ banners.first.featured_product.get_absolute_url }}" class="absolute bottom-4 left-4 right-4 sm:right-auto bg-stone-900/90 hover:bg-stone-900 backdrop-blur-md rounded-2xl p-3.5 shadow-xl border border-white/20 text-white max-w-sm block transition-all group">
+                        <div class="flex items-center justify-between space-x-3">
+                            <div>
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-400">Featured Export Bedding</span>
+                                <h4 class="font-serif font-bold text-sm text-white group-hover:text-terracotta transition-colors leading-tight line-clamp-1">
+                                    {{ banners.first.featured_product.name }}
+                                </h4>
+                                <div class="text-xs text-stone-300 font-semibold mt-0.5">
+                                    Rs. {{ banners.first.featured_product.base_price|floatformat:0 }}
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold bg-terracotta text-white px-3 py-1.5 rounded-lg whitespace-nowrap shadow-sm group-hover:scale-105 transition-transform">
+                                View &rarr;
+                            </span>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="absolute bottom-4 left-4 right-4 sm:right-auto bg-stone-900/85 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-white/20 text-white max-w-xs">
+                        <div class="flex items-center justify-between space-x-3">
+                            <div>
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-400">Export Standard Bedding</span>
+                                <h4 class="font-serif font-bold text-sm text-white leading-tight">Master Hotel Collection</h4>
+                            </div>
+                            <span class="text-xs font-bold bg-white/20 px-2 py-1 rounded text-white whitespace-nowrap">
+                                In Stock
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- Promotional / Discount Ticker (Manageable from Admin) -->
+                <div class="mt-3 flex items-center justify-between bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-sand/80 shadow-sm text-xs">
+                    <span class="text-stone-700 font-medium">
+                        {% if banners and banners.first.promo_discount_text %}
+                            {{ banners.first.promo_discount_text }}
+                        {% else %}
+                            ⚡ Flat <strong class="text-terracotta font-bold">10% OFF</strong> first order: <code class="bg-linen px-1.5 py-0.5 rounded text-navy font-bold">WELCOME10</code> | Direct Manufacturer Pricing
+                        {% endif %}
+                    </span>
+                    <a href="{% if banners and banners.first.effective_button_link %}{{ banners.first.effective_button_link }}{% else %}/collections/bed-sheets/{% endif %}" class="text-terracotta font-bold hover:underline shrink-0 ml-2">Shop Now &rarr;</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- 2. Trust Strip / Value Proposition Cards -->
+<section class="relative bg-linen/50 border-y border-sand/80 py-8 sm:py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            
+            <!-- Card 1: Free Delivery -->
+            <div class="group bg-white p-5 rounded-2xl border border-stone-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-terracotta/40 hover:-translate-y-1 transition-all duration-300 flex items-start space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-terracotta/10 text-terracotta flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                    </svg>
+                </div>
+                <div class="space-y-0.5">
+                    <div class="flex items-center space-x-1.5">
+                        <h3 class="font-serif font-bold text-sm text-navy group-hover:text-terracotta transition-colors">Free Delivery</h3>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 px-1.5 py-0.5 rounded">Rs. 4,000+</span>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-snug">Nationwide rapid dispatch across 300+ cities</p>
+                </div>
+            </div>
+
+            <!-- Card 2: Cash on Delivery -->
+            <div class="group bg-white p-5 rounded-2xl border border-stone-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-emerald-600/40 hover:-translate-y-1 transition-all duration-300 flex items-start space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div class="space-y-0.5">
+                    <div class="flex items-center space-x-1.5">
+                        <h3 class="font-serif font-bold text-sm text-navy group-hover:text-emerald-700 transition-colors">Cash on Delivery</h3>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Verified</span>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-snug">Inspect upon arrival & pay cash at your doorstep</p>
+                </div>
+            </div>
+
+            <!-- Card 3: 100% Combed Cotton -->
+            <div class="group bg-white p-5 rounded-2xl border border-stone-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-amber-600/40 hover:-translate-y-1 transition-all duration-300 flex items-start space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                </div>
+                <div class="space-y-0.5">
+                    <div class="flex items-center space-x-1.5">
+                        <h3 class="font-serif font-bold text-sm text-navy group-hover:text-amber-700 transition-colors">100% Combed Cotton</h3>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">Pure</span>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-snug">Silky, breathable & guaranteed anti-pilling weave</p>
+                </div>
+            </div>
+
+            <!-- Card 4: 7-Day Easy Exchange -->
+            <div class="group bg-white p-5 rounded-2xl border border-stone-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-navy/40 hover:-translate-y-1 transition-all duration-300 flex items-start space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-navy/5 text-navy flex items-center justify-center shrink-0 group-hover:bg-navy group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </div>
+                <div class="space-y-0.5">
+                    <div class="flex items-center space-x-1.5">
+                        <h3 class="font-serif font-bold text-sm text-navy group-hover:text-terracotta transition-colors">7-Day Easy Exchange</h3>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-navy bg-navy/10 px-1.5 py-0.5 rounded">Hassle-Free</span>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-snug">Smooth size, color & bed fitting replacements</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- 3. Category Tiles Grid -->
+<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-bold text-terracotta uppercase tracking-widest">Curated Collections</span>
+        <h2 class="text-3xl sm:text-4xl font-serif font-bold text-navy mt-1">Shop by Room & Category</h2>
+        <p class="text-sm text-stone-500 mt-2">Discover hotel luxury designed specifically for serene Pakistani homes.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+        {% for cat in categories %}
+        <a href="{{ cat.get_absolute_url }}" class="group relative rounded-2xl overflow-hidden aspect-[4/5] bg-stone-100 border border-stone-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-end p-5">
+            {% if cat.image %}
+            <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            {% else %}
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-stone-900/20 to-transparent"></div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent"></div>
+
+            <div class="relative z-10 text-white">
+                <h3 class="font-serif font-bold text-base sm:text-lg group-hover:text-sand transition">{{ cat.name }}</h3>
+                <span class="text-xs text-stone-300 group-hover:underline inline-flex items-center mt-1">Explore &rarr;</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- 4. Best Sellers Section -->
+<section class="py-16 bg-white border-y border-stone-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row items-baseline justify-between mb-10">
+            <div>
+                <span class="text-xs font-bold text-terracotta uppercase tracking-widest">Most Loved</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-navy mt-1">Best Selling Bedding</h2>
+            </div>
+            <a href="/collections/bed-sheets/" class="text-xs sm:text-sm font-semibold text-terracotta hover:underline mt-2 sm:mt-0">
+                View All Best Sellers &rarr;
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {% for product in best_sellers %}
+            {% include 'partials/_product_card.html' with product=product %}
+            {% empty %}
+            <div class="col-span-full py-12 px-4 text-center bg-stone-50/70 rounded-2xl border border-dashed border-stone-200">
+                <p class="text-sm font-serif text-stone-600 font-semibold">New Luxury Bedding Collections Dropping Soon</p>
+                <p class="text-xs text-stone-400 mt-1">Our master artisans are handcrafting export-grade cotton sets. Check back shortly!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 5. Pakistan's #1 Luxury Bedding Spotlight — Fully Optimized for SEO -->
+<section class="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-gradient-to-br from-navy via-[#162033] to-[#0F172A] rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-14 text-white shadow-2xl relative overflow-hidden border border-white/10">
+        
+        <!-- Ambient decorative glow -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-terracotta/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-sand/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-10 relative z-10">
+            
+            <!-- Left Column: Rich SEO Content -->
+            <div class="max-w-2xl text-center lg:text-left space-y-4">
+                
+                <!-- SEO Eyebrow Badges -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                    <span class="inline-flex items-center space-x-1.5 bg-terracotta text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full shadow-sm">
+                        <span>★</span>
+                        <span>Export Quality Bedding Pakistan</span>
+                    </span>
+                    <span class="inline-block bg-white/10 text-sand text-[10px] sm:text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full border border-white/15">
+                        600 Thread Count Egyptian Sateen
+                    </span>
+                </div>
+
+                <!-- Primary SEO Heading for Pakistan Bedding -->
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold leading-tight tracking-tight">
+                    Buy Luxury Bedsheets &amp; Bedding Online in Pakistan — 100% Combed Cotton
+                </h2>
+
+                <!-- Keyword-Rich SEO Narrative -->
+                <p class="text-stone-300 text-xs sm:text-sm lg:text-base font-light leading-relaxed">
+                    Elevate your bedroom with <strong>BeddingOrchid</strong>, Pakistan's leading brand for export-grade 
+                    <strong>hotel luxury bed sheet sets</strong>, <strong>cotton percale duvet covers</strong>, and <strong>all-season plush comforters</strong>. 
+                    Crafted from 100% long-staple combed cotton with 14-inch deep elastic pockets tailored for Pakistani king, queen, and single mattresses.
+                </p>
+
+                <!-- High-Value SEO Feature Tags for Pakistan Search Intent -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1 text-[11px] text-stone-200">
+                    <span class="bg-white/10 px-2.5 py-1 rounded-md border border-white/10">✓ King Bed Sheets (96&times;100)</span>
+                    <span class="bg-white/10 px-2.5 py-1 rounded-md border border-white/10">✓ Queen Fitted Sheets</span>
+                    <span class="bg-white/10 px-2.5 py-1 rounded-md border border-white/10">✓ Bridal &amp; Luxury Sets</span>
+                    <span class="bg-white/10 px-2.5 py-1 rounded-md border border-white/10">✓ Anti-Pilling Guarantee</span>
+                    <span class="bg-white/10 px-2.5 py-1 rounded-md border border-white/10">✓ Cash on Delivery (COD)</span>
+                </div>
+
+                <!-- Action CTA & Promo Code -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <a href="{% url 'catalog:category_detail' category_path='bed-sheets' %}" class="bg-terracotta hover:bg-opacity-95 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-xs sm:text-sm flex items-center space-x-2">
+                        <span>Shop Bed Sheets (COD Available)</span>
+                        <span>&rarr;</span>
+                    </a>
+                    <div class="flex items-center space-x-2 bg-white/10 px-3.5 py-2.5 rounded-xl border border-white/15 text-xs text-stone-200">
+                        <span>Use Promo Code:</span>
+                        <strong class="text-sand font-mono tracking-wider font-bold uppercase bg-white/15 px-2 py-0.5 rounded">WELCOME10</strong>
+                        <span class="text-emerald-400 font-semibold">(10% Off)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: SEO Trust & Specification Cards -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-[300px] sm:max-w-sm shrink-0">
+                
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center border border-white/15 hover:bg-white/15 transition group">
+                    <span class="text-2xl sm:text-3xl font-bold font-serif text-sand block group-hover:scale-105 transition-transform">600 TC</span>
+                    <span class="text-xs font-semibold text-white block mt-1">Egyptian Cotton</span>
+                    <span class="text-[10px] text-stone-300 block">Export Grade Sateen</span>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center border border-white/15 hover:bg-white/15 transition group">
+                    <span class="text-2xl sm:text-3xl font-bold font-serif text-sand block group-hover:scale-105 transition-transform">100%</span>
+                    <span class="text-xs font-semibold text-white block mt-1">Pure Breathable</span>
+                    <span class="text-[10px] text-stone-300 block">0% Synthetic Blends</span>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center border border-white/15 hover:bg-white/15 transition group">
+                    <span class="text-2xl sm:text-3xl font-bold font-serif text-sand block group-hover:scale-105 transition-transform">300+</span>
+                    <span class="text-xs font-semibold text-white block mt-1">Pakistan Cities</span>
+                    <span class="text-[10px] text-stone-300 block">Fast COD Nationwide</span>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl text-center border border-white/15 hover:bg-white/15 transition group">
+                    <span class="text-2xl sm:text-3xl font-bold font-serif text-sand block group-hover:scale-105 transition-transform">7 Days</span>
+                    <span class="text-xs font-semibold text-white block mt-1">Easy Exchanges</span>
+                    <span class="text-[10px] text-stone-300 block">Doorstep Money-Back</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SEO Quick Link Badges: Targeted for Ranking in Pakistan -->
+        <div class="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] text-stone-300">
+            <span class="font-semibold text-sand">Popular Bedding Searches in Pakistan:</span>
+            <div class="flex flex-wrap gap-2 text-stone-300">
+                <a href="/collections/bed-sheets/" class="hover:text-white underline decoration-stone-500 hover:decoration-white transition">Bedsheets Online</a> &bull;
+                <a href="/collections/bed-sheets/" class="hover:text-white underline decoration-stone-500 hover:decoration-white transition">King Size Bedsheet Sets</a> &bull;
+                <a href="/collections/duvet-quilt-covers/" class="hover:text-white underline decoration-stone-500 hover:decoration-white transition">Duvet &amp; Quilt Covers</a> &bull;
+                <a href="/collections/comforters-quilts/" class="hover:text-white underline decoration-stone-500 hover:decoration-white transition">Winter Comforters</a> &bull;
+                <a href="/collections/pillows-protectors/" class="hover:text-white underline decoration-stone-500 hover:decoration-white transition">Mattress Protectors Pakistan</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- 6. New Arrivals -->
+<section class="py-16 bg-white border-t border-stone-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row items-baseline justify-between mb-10">
+            <div>
+                <span class="text-xs font-bold text-terracotta uppercase tracking-widest">Fresh Off The Loom</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-navy mt-1">New Bedding Arrivals</h2>
+            </div>
+            <a href="/collections/duvet-quilt-covers/" class="text-xs sm:text-sm font-semibold text-terracotta hover:underline mt-2 sm:mt-0">
+                Explore All New &rarr;
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {% for product in new_arrivals %}
+            {% include 'partials/_product_card.html' with product=product %}
+            {% empty %}
+            <div class="col-span-full py-12 px-4 text-center bg-stone-50/70 rounded-2xl border border-dashed border-stone-200">
+                <p class="text-sm font-serif text-stone-600 font-semibold">Fresh Linen Drops In Production</p>
+                <p class="text-xs text-stone-400 mt-1">New 600-thread-count sateen and crisp percale pieces will be added soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 7. Customer Reviews Spotlight -->
+<section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-bold text-terracotta uppercase tracking-widest">Real Customer Love</span>
+        <h2 class="text-3xl sm:text-4xl font-serif font-bold text-navy mt-1">Loved by 10,000+ Sleepers Across Pakistan</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for review in reviews %}
+        <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center space-x-1 text-amber-500 text-sm mb-3">
+                    {% for i in "12345" %}★{% endfor %}
+                </div>
+                <h4 class="font-bold text-stone-900 text-base mb-2 font-serif">&ldquo;{{ review.title }}&rdquo;</h4>
+                <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                    {{ review.comment }}
+                </p>
+            </div>
+            <div class="pt-4 border-t border-stone-100 flex items-center justify-between text-xs">
+                <span class="font-semibold text-stone-900">{{ review.user.full_name|default:"Verified Customer" }}</span>
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">✓ Verified Buyer</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-8 text-stone-400">Reviews will appear here.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- 8. Brand Story & Nationwide Craftsmanship Block -->
+<section class="py-14 sm:py-18 bg-linen/60 border-t border-sand/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl border border-stone-200/80 p-6 sm:p-10 lg:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-8">
+            
+            <!-- Header & Philosophy -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center border-b border-sand/70 pb-8">
+                <div class="lg:col-span-7 space-y-2.5">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-terracotta"></span>
+                        <span class="text-xs font-bold uppercase tracking-[0.2em] text-terracotta">Artisan Textile Excellence</span>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-navy leading-tight">
+                        Buy Luxury Bedding &amp; Bedsheets Online in Pakistan — BeddingOrchid
+                    </h3>
+                    <p class="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+                        Looking for hotel-grade luxury bed sheet sets, crisp cotton percale duvets, or all-season plush comforters in Pakistan? 
+                        <strong>BeddingOrchid</strong> brings you export-quality home textiles crafted from 100% combed long-staple cotton, ensuring a tranquil and cooling sleep night after night.
+                    </p>
+                </div>
+                <div class="lg:col-span-5 bg-linen/50 rounded-2xl p-5 border border-sand flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-navy text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <svg class="w-6 h-6 text-sand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
+                    <div class="text-xs text-stone-600">
+                        <span class="font-bold text-navy block text-sm font-serif">100% Combed Cotton Guarantee</span>
+                        Anti-pilling weave, breathable percale, and silky Egyptian sateen made for peaceful sleep.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Pillars Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Pillar 1 -->
+                <div class="space-y-2 p-4 rounded-xl bg-stone-50/60 border border-stone-100">
+                    <div class="flex items-center space-x-2 text-terracotta">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-navy">Tailored Bed Sizes</h4>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-relaxed">
+                        Whether you need King size sheets (96&times;100 in), Queen fitted sheets, Single bed sets, or waterproof protectors, our bedding fits deep mattresses effortlessly.
+                    </p>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="space-y-2 p-4 rounded-xl bg-stone-50/60 border border-stone-100">
+                    <div class="flex items-center space-x-2 text-emerald-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                        </svg>
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-navy">Cash on Delivery (COD)</h4>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-relaxed">
+                        Inspect parcel at your doorstep and pay cash upon arrival. Free nationwide delivery on orders above Rs. 4,000 with hassle-free 7-day exchanges.
+                    </p>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="space-y-2 p-4 rounded-xl bg-stone-50/60 border border-stone-100">
+                    <div class="flex items-center space-x-2 text-navy">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-navy">Fast Dispatch Across 300+ Cities</h4>
+                    </div>
+                    <p class="text-xs text-stone-500 leading-relaxed">
+                        Express insured courier shipping through top logistics partners across all major metropolitan hubs and secondary districts nationwide.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Popular Delivery Cities Badges -->
+            <div class="pt-4 border-t border-stone-100 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-stone-400 font-semibold uppercase text-[10px] tracking-wider mr-1">🚚 Serving Nationwide:</span>
+                {% for city in "Karachi,Lahore,Islamabad,Rawalpindi,Faisalabad,Multan,Peshawar,Sialkot,Gujranwala,Quetta,Hyderabad,Bahawalpur,Sukkur,Abbottabad"|make_list|join:""|slice:":1000" %}
+                {% endfor %}
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Karachi</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Lahore</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Islamabad</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Rawalpindi</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Faisalabad</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Multan</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Peshawar</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Sialkot</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Gujranwala</span>
+                <span class="px-2.5 py-1 bg-stone-100 hover:bg-linen text-stone-700 rounded-lg text-[11px] font-medium transition cursor-default">📍 Quetta</span>
+                <span class="px-2.5 py-1 bg-terracotta/10 text-terracotta font-semibold rounded-lg text-[11px]">&plus; 300+ Towns</span>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

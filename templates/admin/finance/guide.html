@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Finance Guide{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:24px;font-family:'Segoe UI',system-ui,sans-serif;">
+
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:4px;">📖 Finance Guide — Definitions &amp; Formulas</h1>
+  <p style="color:#64748B;margin-bottom:32px;">Every number on the Finance Dashboard, explained in plain words. Last updated with the system build.</p>
+
+  {% for section in sections %}
+  <div style="margin-bottom:32px;">
+    <h2 style="font-size:16px;font-weight:700;border-bottom:2px solid #E2E8F0;padding-bottom:8px;margin-bottom:16px;">{{ section.title }}</h2>
+    {% for item in section.items %}
+    <div style="margin-bottom:16px;padding:14px 18px;background:#F8FAFC;border-left:4px solid #6366F1;border-radius:0 8px 8px 0;">
+      <strong style="font-size:14px;color:#1E293B;">{{ item.term }}</strong>
+      {% if item.formula %}
+      <div style="font-family:monospace;font-size:12px;background:#1E293B;color:#A5F3FC;padding:6px 10px;border-radius:4px;margin:6px 0;">{{ item.formula }}</div>
+      {% endif %}
+      <div style="font-size:13px;color:#475569;margin-top:4px;">{{ item.definition }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+{% block content_title %}{% endblock %}

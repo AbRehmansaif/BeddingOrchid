@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="none">
+    <defs>
+        <!-- Rich Navy Background Gradient -->
+        <linearGradient id="boNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0F172A" />
+            <stop offset="50%" stop-color="#1E293B" />
+            <stop offset="100%" stop-color="#162032" />
+        </linearGradient>
+
+        <!-- Luxurious Champagne Gold Gradient -->
+        <linearGradient id="boGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F9E7BA" />
+            <stop offset="35%" stop-color="#E2B874" />
+            <stop offset="70%" stop-color="#C59B4B" />
+            <stop offset="100%" stop-color="#E9C886" />
+        </linearGradient>
+
+        <!-- Petal Highlight Gradient (Warm Silk & Gold sheen) -->
+        <linearGradient id="boPetalTop" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#F7E6CE" stop-opacity="0.75" />
+        </linearGradient>
+
+        <linearGradient id="boPetalWing" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9" />
+            <stop offset="60%" stop-color="#FDFBF7" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#E5C79E" stop-opacity="0.6" />
+        </linearGradient>
+
+        <!-- Subtle Glow Filter -->
+        <filter id="boSoftShadow" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.25" />
+        </filter>
+    </defs>
+
+    <!-- Outer Squircle Badge with subtle border -->
+    <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#boNavyGrad)" stroke="url(#boGoldGrad)" stroke-width="1.5" stroke-opacity="0.4" />
+    <rect x="9" y="9" width="102" height="102" rx="25" fill="none" stroke="#FFFFFF" stroke-width="0.75" stroke-opacity="0.1" />
+
+    <!-- Stylized Orchid & Bedding Linen Bloom Motif -->
+    <g filter="url(#boSoftShadow)">
+        <!-- Top Dorsal Petal (Evoking orchid sepal + pillow contour) -->
+        <path d="M60 25 C66 33 68 43 60 52 C52 43 54 33 60 25 Z" 
+              fill="url(#boGoldGrad)" />
+        <path d="M60 27 C64.5 33.5 65.5 41 60 48 C54.5 41 55.5 33.5 60 27 Z" 
+              fill="url(#boPetalTop)" opacity="0.95" />
+
+        <!-- Left Wing Petal (Lustrous folded linen curve) -->
+        <path d="M57 51 C45 39 31 43 27 55 C24 65 37 71 52 59 C54 57 56 54 57 51 Z" 
+              fill="url(#boPetalWing)" />
+        <path d="M57 51 C45 39 31 43 27 55 C24 65 37 71 52 59" 
+              stroke="url(#boGoldGrad)" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.8" />
+
+        <!-- Right Wing Petal (Mirrored drapery fold) -->
+        <path d="M63 51 C75 39 89 43 93 55 C96 65 83 71 68 59 C66 57 64 54 63 51 Z" 
+              fill="url(#boPetalWing)" />
+        <path d="M63 51 C75 39 89 43 93 55 C96 65 83 71 68 59" 
+              stroke="url(#boGoldGrad)" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.8" />
+
+        <!-- Lower Left Drooping Sepal -->
+        <path d="M53 60 C40 68 36 79 43 86 C48 91 55 86 57 70 C56 66 54 63 53 60 Z" 
+              fill="url(#boGoldGrad)" opacity="0.85" />
+        <path d="M53 61 C42 68 39 77 44 83 C48 87 54 83 55 70" 
+              stroke="#FFFFFF" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="0.6" />
+
+        <!-- Lower Right Drooping Sepal -->
+        <path d="M67 60 C80 68 84 79 77 86 C72 91 65 86 63 70 C64 66 66 63 67 60 Z" 
+              fill="url(#boGoldGrad)" opacity="0.85" />
+        <path d="M67 61 C78 68 81 77 76 83 C72 87 66 83 65 70" 
+              stroke="#FFFFFF" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="0.6" />
+
+        <!-- Central Orchid Labellum / Column (Delicate heart/folded blossom core) -->
+        <path d="M60 52 C54 57 52 66 60 74 C68 66 66 57 60 52 Z" 
+              fill="url(#boGoldGrad)" />
+        
+        <!-- Center Gold Diamond Stamen / Sparkle -->
+        <polygon points="60,56 62.5,61 60,66 57.5,61" fill="#FFFFFF" opacity="0.95" />
+        <circle cx="60" cy="61" r="1.2" fill="#C25E38" />
+
+        <!-- Subtle Base Crescent Ribbon -->
+        <path d="M44 87 C54 92 66 92 76 87" stroke="url(#boGoldGrad)" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.7" />
+    </g>
+</svg>

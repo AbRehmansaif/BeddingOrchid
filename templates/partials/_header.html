@@ -1,0 +1,323 @@
+<!-- Top Announcement & Quick Utility Bar -->
+<div class="bg-navy text-stone-200 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-navy/40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <!-- Announcement Message -->
+        <div class="flex-1 text-center sm:text-left text-[11px] sm:text-xs font-medium tracking-wide flex items-center justify-center sm:justify-start space-x-2">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-terracotta animate-pulse"></span>
+            <span>{{ site_settings.announcement_bar_text|default:"✨ Complimentary Shipping Across Pakistan on Orders Over Rs. 4,000 • Cash on Delivery Available" }}</span>
+            {% if site_settings.announcement_bar_link %}
+            <a href="{{ site_settings.announcement_bar_link }}" class="text-terracotta hover:underline font-semibold ml-1 hidden md:inline">Shop Now &rarr;</a>
+            {% endif %}
+        </div>
+
+        <!-- Top Right Utility Links (Desktop) -->
+        <div class="hidden sm:flex items-center space-x-5 text-[11px] font-medium text-stone-300">
+            <a href="{% url 'orders:track_order' %}" class="hover:text-terracotta transition flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8" />
+                </svg>
+                <span>Track Order</span>
+            </a>
+            <span class="text-stone-500">|</span>
+            <a href="{% url 'pages:detail' slug='size-guide' %}" class="hover:text-terracotta transition flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 7h16a1 1 0 010 2H4a1 1 0 010-2z" />
+                </svg>
+                <span>Size Guide</span>
+            </a>
+            {% if site_settings.whatsapp_number %}
+            <span class="text-stone-500">|</span>
+            <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" rel="noopener" class="hover:text-emerald-400 transition flex items-center space-x-1 text-emerald-400">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
+                </svg>
+                <span>Helpline</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Main Sticky Header -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.03)] transition-all duration-200">
+    
+    <!-- Top Branding & Search Row -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 sm:h-20 gap-4 lg:gap-8">
+            
+            <!-- Left: Mobile Menu Toggle & Brand Logo -->
+            <div class="flex items-center space-x-3 shrink-0">
+                <!-- Mobile Menu Toggle Button -->
+                <button type="button" id="mobileMenuToggle" onclick="toggleMobileMenu()" class="lg:hidden p-2 -ml-2 text-stone-700 hover:text-terracotta focus:outline-none transition rounded-lg hover:bg-stone-50" aria-label="Toggle menu" aria-expanded="false">
+                    <svg id="menuIconOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="menuIconClose" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!-- Brand Logo (Left on Desktop) -->
+                <a href="{% url 'catalog:home' %}" class="flex flex-col items-start group py-1" aria-label="BeddingOrchid Home">
+                    <div class="flex items-center space-x-2.5">
+                        <!-- Luxury Bedding & Orchid Emblem Icon -->
+                        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 shrink-0">
+                            <svg class="w-full h-full" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="headerBadgeNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#0F172A" />
+                                        <stop offset="50%" stop-color="#1E293B" />
+                                        <stop offset="100%" stop-color="#162032" />
+                                    </linearGradient>
+                                    <linearGradient id="headerBadgeGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#F9E7BA" />
+                                        <stop offset="35%" stop-color="#E2B874" />
+                                        <stop offset="70%" stop-color="#C59B4B" />
+                                        <stop offset="100%" stop-color="#E9C886" />
+                                    </linearGradient>
+                                    <linearGradient id="headerBadgePetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+                                        <stop offset="100%" stop-color="#F7E6CE" stop-opacity="0.75" />
+                                    </linearGradient>
+                                </defs>
+                                <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#headerBadgeNavy)" stroke="url(#headerBadgeGold)" stroke-width="2" stroke-opacity="0.6" />
+                                <rect x="10" y="10" width="100" height="100" rx="24" fill="none" stroke="#FFFFFF" stroke-width="0.75" stroke-opacity="0.15" />
+                                <g>
+                                    <!-- Top Petal -->
+                                    <path d="M60 25 C66 33 68 43 60 52 C52 43 54 33 60 25 Z" fill="url(#headerBadgeGold)" />
+                                    <path d="M60 27 C64.5 33.5 65.5 41 60 48 C54.5 41 55.5 33.5 60 27 Z" fill="#FFFFFF" opacity="0.95" />
+                                    <!-- Left Wing Petal -->
+                                    <path d="M57 51 C45 39 31 43 27 55 C24 65 37 71 52 59 C54 57 56 54 57 51 Z" fill="url(#headerBadgePetal)" />
+                                    <path d="M57 51 C45 39 31 43 27 55 C24 65 37 71 52 59" stroke="url(#headerBadgeGold)" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.85" />
+                                    <!-- Right Wing Petal -->
+                                    <path d="M63 51 C75 39 89 43 93 55 C96 65 83 71 68 59 C66 57 64 54 63 51 Z" fill="url(#headerBadgePetal)" />
+                                    <path d="M63 51 C75 39 89 43 93 55 C96 65 83 71 68 59" stroke="url(#headerBadgeGold)" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.85" />
+                                    <!-- Lower Sepals -->
+                                    <path d="M53 60 C40 68 36 79 43 86 C48 91 55 86 57 70 C56 66 54 63 53 60 Z" fill="url(#headerBadgeGold)" opacity="0.9" />
+                                    <path d="M67 60 C80 68 84 79 77 86 C72 91 65 86 63 70 C64 66 66 63 67 60 Z" fill="url(#headerBadgeGold)" opacity="0.9" />
+                                    <!-- Central Orchid Labellum Core -->
+                                    <path d="M60 52 C54 57 52 66 60 74 C68 66 66 57 60 52 Z" fill="url(#headerBadgeGold)" />
+                                    <!-- Diamond Stamen Sparkle -->
+                                    <polygon points="60,56 62.5,61 60,66 57.5,61" fill="#FFFFFF" opacity="0.95" />
+                                    <circle cx="60" cy="61" r="1.3" fill="#C25E38" />
+                                </g>
+                            </svg>
+                        </span>
+                        <!-- Brand Name -->
+                        <span class="text-2xl sm:text-3xl font-serif font-bold text-navy tracking-tight group-hover:text-stone-900 transition leading-none">
+                            Bedding<span class="text-terracotta">Orchid</span>
+                        </span>
+                    </div>
+                    <span class="text-[9px] sm:text-[10px] tracking-[0.24em] text-stone-500 uppercase font-semibold mt-1">
+                        Luxury Home Textiles &bull; Pakistan
+                    </span>
+                </a>
+            </div>
+
+            <!-- Center: Prominent Search Bar (Desktop) -->
+            <div class="hidden lg:flex flex-1 max-w-lg xl:max-w-xl mx-auto px-2">
+                <form action="{% url 'catalog:search' %}" method="GET" class="w-full relative">
+                    <input type="text" name="q" placeholder="Search sheets, duvets, comforters, quilts..." class="w-full pl-10 pr-24 py-2.5 text-xs bg-stone-50/90 hover:bg-white focus:bg-white rounded-full border border-stone-200 focus:outline-none focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta transition shadow-inner text-stone-700 placeholder-stone-400" />
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-navy hover:bg-terracotta text-white text-[11px] font-semibold px-4 py-1.5 rounded-full transition shadow-sm">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right: Action Icons (Search on mobile, Account, Wishlist, Cart) -->
+            <div class="flex items-center justify-end space-x-1 sm:space-x-3 shrink-0">
+                <!-- Mobile Search Trigger Button -->
+                <button type="button" onclick="toggleMobileSearch()" class="lg:hidden p-2 text-stone-700 hover:text-terracotta transition rounded-lg hover:bg-stone-50" aria-label="Open search">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+
+                <!-- Customer Account -->
+                <a href="{% url 'accounts:profile' %}" class="text-stone-700 hover:text-terracotta transition p-2 rounded-lg hover:bg-stone-50 relative group" title="My Account">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="hidden xl:group-hover:block absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-0.5 bg-navy text-white text-[10px] rounded shadow-md whitespace-nowrap z-50">
+                        Account
+                    </span>
+                </a>
+
+                <!-- Wishlist -->
+                <a href="{% url 'accounts:wishlist' %}" class="text-stone-700 hover:text-terracotta transition p-2 rounded-lg hover:bg-stone-50 relative hidden sm:block group" title="Favourites">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span class="hidden xl:group-hover:block absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2 py-0.5 bg-navy text-white text-[10px] rounded shadow-md whitespace-nowrap z-50">
+                        Wishlist
+                    </span>
+                </a>
+
+                <!-- Shopping Bag Button -->
+                <button type="button" onclick="toggleMiniCart()" class="text-stone-800 hover:text-terracotta transition p-2 rounded-xl hover:bg-stone-50 flex items-center space-x-1.5 relative group" aria-label="Open Shopping Bag">
+                    <div class="relative">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-navy group-hover:text-terracotta transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="cart-count-badge absolute -top-1.5 -right-2 bg-terracotta text-white text-[10px] font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-sm {% if not cart_count %}hidden{% endif %}">
+                            {{ cart_count|default:0 }}
+                        </span>
+                    </div>
+                    <span class="hidden md:inline text-xs font-semibold text-navy group-hover:text-terracotta transition">
+                        Bag
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Category Navigation Bar (Desktop) -->
+    <!-- Gives every category ample breathing space with NO cramped multi-line wrapping -->
+    <nav class="hidden lg:block border-t border-stone-100 bg-[#FAF8F5]/80 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-center space-x-7 xl:space-x-10 py-3">
+                
+                <!-- Home Link -->
+                <a href="{% url 'catalog:home' %}" class="whitespace-nowrap text-xs font-semibold tracking-wider uppercase text-stone-700 hover:text-terracotta transition py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-[2px] after:bg-terracotta after:transition-all">
+                    Home
+                </a>
+
+                <!-- Dynamic Root Categories with Dropdown Menus -->
+                {% for root_cat in categories_tree %}
+                <div class="relative group">
+                    <a href="{{ root_cat.get_absolute_url }}" class="whitespace-nowrap flex items-center text-xs font-semibold tracking-wider uppercase text-stone-700 hover:text-terracotta transition py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-[2px] after:bg-terracotta after:transition-all">
+                        <span>{{ root_cat.name }}</span>
+                        {% if root_cat.children.all %}
+                        <svg class="w-3 h-3 ml-1 text-stone-400 group-hover:text-terracotta group-hover:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        {% endif %}
+                    </a>
+                    
+                    {% if root_cat.children.all %}
+                    <!-- Hover Dropdown Card -->
+                    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-64 bg-white shadow-2xl rounded-2xl border border-stone-200/80 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-stone-100 px-2">
+                            <span class="text-[10px] font-bold text-stone-400 tracking-wider uppercase">{{ root_cat.name }}</span>
+                            <a href="{{ root_cat.get_absolute_url }}" class="text-[10px] font-bold text-terracotta hover:underline">View All &rarr;</a>
+                        </div>
+                        <div class="space-y-0.5">
+                            {% for sub in root_cat.children.all %}
+                            <a href="{{ sub.get_absolute_url }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-stone-700 hover:bg-stone-50 hover:text-terracotta font-medium transition">
+                                <span>{{ sub.name }}</span>
+                                <span class="text-stone-300 text-[10px]">&rsaquo;</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Search Bar (slide-down) -->
+    <div id="mobileSearchBar" class="hidden lg:hidden border-t border-stone-100 bg-white px-4 py-3 shadow-inner">
+        <form action="{% url 'catalog:search' %}" method="GET">
+            <div class="relative">
+                <input type="text" name="q" placeholder="Search bed sheets, duvets, comforters..." autofocus class="w-full pl-4 pr-10 py-2.5 text-xs bg-stone-50 rounded-xl border border-stone-200 focus:outline-none focus:ring-1 focus:ring-terracotta" />
+                <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-terracotta">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mobile Off-Canvas Dropdown Menu -->
+    <div id="mobileMenu" class="hidden lg:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-6 space-y-1 overflow-y-auto max-h-[80vh] shadow-xl">
+        <a href="{% url 'catalog:home' %}" class="flex items-center py-3 text-stone-800 font-semibold text-sm border-b border-stone-100">
+            <svg class="w-4 h-4 mr-3 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Home
+        </a>
+
+        {% for root_cat in categories_tree %}
+        <div class="border-b border-stone-100">
+            <button type="button" onclick="toggleMobileSubcat(this)" class="flex items-center justify-between w-full py-3 font-semibold text-stone-900 text-sm text-left">
+                <span class="flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-terracotta/70 mr-2.5"></span>
+                    {{ root_cat.name }}
+                </span>
+                {% if root_cat.children.all %}
+                <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+                {% endif %}
+            </button>
+            {% if root_cat.children.all %}
+            <div class="subcategory-panel hidden pl-6 pb-2 space-y-1">
+                <a href="{{ root_cat.get_absolute_url }}" class="block py-1.5 text-xs text-terracotta font-bold">All {{ root_cat.name }} &rarr;</a>
+                {% for sub in root_cat.children.all %}
+                <a href="{{ sub.get_absolute_url }}" class="block py-1.5 text-xs text-stone-600 hover:text-navy transition">{{ sub.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <a href="{% url 'orders:track_order' %}" class="flex items-center py-3 text-stone-800 font-semibold text-sm border-b border-stone-100">
+            <svg class="w-4 h-4 mr-3 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8"/></svg>
+            Track Your Order
+        </a>
+
+        <a href="{% url 'pages:detail' slug='size-guide' %}" class="flex items-center py-3 text-stone-800 font-semibold text-sm border-b border-stone-100">
+            <svg class="w-4 h-4 mr-3 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 7h16a1 1 0 010 2H4a1 1 0 010-2z"/></svg>
+            Bedding Size Guide
+        </a>
+
+        <a href="{% url 'accounts:profile' %}" class="flex items-center py-3 text-stone-800 font-semibold text-sm">
+            <svg class="w-4 h-4 mr-3 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            My Account & Orders
+        </a>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const openIcon = document.getElementById('menuIconOpen');
+    const closeIcon = document.getElementById('menuIconClose');
+    const btn = document.getElementById('mobileMenuToggle');
+    const isOpen = !menu.classList.contains('hidden');
+    menu.classList.toggle('hidden');
+    openIcon.classList.toggle('hidden', !isOpen);
+    closeIcon.classList.toggle('hidden', isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+    // Close search if open
+    document.getElementById('mobileSearchBar').classList.add('hidden');
+}
+
+function toggleMobileSearch() {
+    const bar = document.getElementById('mobileSearchBar');
+    bar.classList.toggle('hidden');
+    // Close menu if open
+    document.getElementById('mobileMenu').classList.add('hidden');
+    document.getElementById('menuIconOpen').classList.remove('hidden');
+    document.getElementById('menuIconClose').classList.add('hidden');
+    if (!bar.classList.contains('hidden')) {
+        bar.querySelector('input').focus();
+    }
+}
+
+function toggleMobileSubcat(btn) {
+    const panel = btn.nextElementSibling;
+    const arrow = btn.querySelector('svg:last-child');
+    if (panel) {
+        panel.classList.toggle('hidden');
+        if (arrow) arrow.classList.toggle('rotate-180');
+    }
+}
+</script>

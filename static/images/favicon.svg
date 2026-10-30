@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+    <defs>
+        <linearGradient id="favNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0F172A" />
+            <stop offset="100%" stop-color="#1E293B" />
+        </linearGradient>
+        <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F9E7BA" />
+            <stop offset="50%" stop-color="#E2B874" />
+            <stop offset="100%" stop-color="#C59B4B" />
+        </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#favNavy)" stroke="url(#favGold)" stroke-width="1.5" />
+    <g transform="translate(32, 32) scale(0.55) translate(-60, -58)">
+        <path d="M60 25 C66 33 68 43 60 52 C52 43 54 33 60 25 Z" fill="url(#favGold)" />
+        <path d="M57 51 C45 39 31 43 27 55 C24 65 37 71 52 59 Z" fill="#FFFFFF" opacity="0.9" />
+        <path d="M63 51 C75 39 89 43 93 55 C96 65 83 71 68 59 Z" fill="#FFFFFF" opacity="0.9" />
+        <path d="M53 60 C40 68 36 79 43 86 C48 91 55 86 57 70 Z" fill="url(#favGold)" />
+        <path d="M67 60 C80 68 84 79 77 86 C72 91 65 86 63 70 Z" fill="url(#favGold)" />
+        <path d="M60 52 C54 57 52 66 60 74 C68 66 66 57 60 52 Z" fill="url(#favGold)" />
+        <circle cx="60" cy="62" r="2.2" fill="#FFFFFF" />
+    </g>
+</svg>

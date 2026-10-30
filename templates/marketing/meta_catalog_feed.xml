@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+  <channel>
+    <title>{{ site_settings.store_name|default:"BeddingOrchid" }} Product Catalog</title>
+    <link>{{ base_url }}</link>
+    <description>Luxury Bedding, Bedsheets, Duvet Covers &amp; Comforters in Pakistan</description>
+    {% for v in variants %}
+    <item>
+      <g:id>{{ v.sku }}</g:id>
+      <g:item_group_id>{{ v.product.slug }}</g:item_group_id>
+      <g:title>{{ v.product.name }} - {{ v.size.name|default:"" }} {{ v.color.name|default:"" }}</g:title>
+      <g:description>{{ v.product.short_description|default:v.product.name }}</g:description>
+      <g:link>{{ base_url }}{{ v.product.get_absolute_url }}?variant={{ v.sku }}</g:link>
+      <g:image_link>{% if v.image and v.image.image %}{{ base_url }}{{ v.image.image.url }}{% elif v.product.primary_image %}{{ base_url }}{{ v.product.primary_image.image.url }}{% endif %}</g:image_link>
+      <g:brand>{{ site_settings.store_name|default:"BeddingOrchid" }}</g:brand>
+      <g:condition>new</g:condition>
+      <g:availability>{% if v.is_in_stock %}in stock{% else %}out of stock{% endif %}</g:availability>
+      <g:price>{{ v.effective_price|floatformat:2 }} PKR</g:price>
+      {% if v.effective_compare_at_price and v.effective_compare_at_price > v.effective_price %}
+      <g:sale_price>{{ v.effective_price|floatformat:2 }} PKR</g:sale_price>
+      {% endif %}
+      <g:google_product_category>Home &amp; Garden &gt; Linens &amp; Bedding &gt; Bedding</g:google_product_category>
+      <g:product_type>{{ v.product.category.name }}</g:product_type>
+      {% if v.color %}<g:color>{{ v.color.name }}</g:color>{% endif %}
+      {% if v.size %}<g:size>{{ v.size.name }}</g:size>{% endif %}
+      <g:material>{{ v.product.material }}</g:material>
+    </item>
+    {% endfor %}
+  </channel>
+</rss>

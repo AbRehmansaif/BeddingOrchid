@@ -1,0 +1,1056 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.meta_title|default:product.name }} | {{ site_settings.store_name|default:'BeddingOrchid' }}{% endblock %}
+{% block meta_description %}{{ product.meta_description }}{% endblock %}
+
+{% block extra_head %}
+<!-- JSON-LD Product Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.name }}",
+  "image": [
+    {% for img in product.images.all %}"https://{{ request.get_host }}{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}
+  ],
+  "description": "{{ product.short_description|striptags|escapejs }}",
+  "sku": "{{ product.sku_prefix|default:product.slug }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ site_settings.store_name }}"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "https://{{ request.get_host }}{{ product.get_absolute_url }}",
+    "priceCurrency": "PKR",
+    "price": "{{ product.base_price }}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{ site_settings.store_name }}"
+    }
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ product.average_rating|default:'5.0' }}",
+    "reviewCount": "{{ product.reviews_count|default:'12' }}"
+  }
+}
+</script>
+
+{% if site_settings.meta_pixel_id %}
+<script>
+  if (typeof fbq === 'function') {
+    fbq('track', 'ViewContent', {
+      content_ids: ['{{ product.variants.first.sku|default:product.id }}'],
+      content_type: 'product',
+      value: {{ product.base_price }},
+      currency: 'PKR'
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 sm:pb-12">
+    
+    <!-- Breadcrumbs -->
+    <nav class="text-xs text-stone-500 mb-5 sm:mb-6 flex items-center space-x-2 flex-wrap gap-y-1">
+        <a href="{% url 'catalog:home' %}" class="hover:text-navy">Home</a>
+        <span>/</span>
+        <a href="{{ product.category.get_absolute_url }}" class="hover:text-navy">{{ product.category.name }}</a>
+        <span>/</span>
+        <span class="text-navy font-semibold truncate max-w-[200px] sm:max-w-none">{{ product.name }}</span>
+    </nav>
+
+    <!-- 2 Column Product Showcase -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-14">
+        
+        <!-- Gallery (7 cols) -->
+        <div class="lg:col-span-7 space-y-3 sm:space-y-4">
+            <!-- Main Featured Image -->
+            <div class="relative aspect-square w-full bg-stone-100 rounded-2xl sm:rounded-3xl overflow-hidden border border-stone-200/80 shadow-sm">
+                {% if product.primary_image %}
+                <img id="mainProductImage" src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover object-center transition duration-300" />
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center font-serif text-stone-400">{{ site_settings.store_name|default:'BeddingOrchid' }} Bedding</div>
+                {% endif %}
+
+                <!-- Badges -->
+                <div class="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col space-y-2 z-10">
+                    {% for tag in product.sale_tags.all %}
+                    <span class="text-[10px] sm:text-xs font-bold tracking-wider uppercase px-2.5 sm:px-3 py-1 rounded-md shadow-md" style="background-color: {{ tag.background_color }}; color: {{ tag.text_color }};">
+                        {{ tag.label }}
+                    </span>
+                    {% endfor %}
+                    {% if product.discount_percent > 0 and not product.sale_tags.all %}
+                    <span class="bg-red-600 text-white text-[10px] sm:text-xs font-bold tracking-wider uppercase px-2.5 sm:px-3 py-1 rounded-md shadow-md">
+                        -{{ product.discount_percent }}% OFF
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Thumbnail Grid -->
+            {% if product.images.count > 1 %}
+            <div class="flex space-x-2 sm:space-x-3 overflow-x-auto pb-2 no-scrollbar" id="thumbnailsContainer">
+                {% for img in product.images.all %}
+                <button type="button" onclick="selectThumbnail('{{ img.image.url }}', this)" class="thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 {% if forloop.first %}border-navy ring-2 ring-navy/20{% else %}border-stone-200{% endif %} hover:border-navy focus:border-navy transition flex-shrink-0" data-src="{{ img.image.url }}">
+                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" class="w-full h-full object-cover" />
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Buy Box & Options (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col justify-start">
+            
+            <!-- Category & Specs Badge -->
+            <div class="flex items-center space-x-2 text-xs font-semibold text-stone-500 mb-2">
+                <span class="text-terracotta">{{ product.category.name }}</span>
+                <span>&bull;</span>
+                <span>{{ product.thread_count }}</span>
+                <span>&bull;</span>
+                <span>{{ product.material }}</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-navy leading-tight mb-3">
+                {{ product.name }}
+            </h1>
+
+            <!-- Ratings & Reviews -->
+            <div class="flex items-center space-x-2 mb-4 text-xs">
+                <div class="flex text-amber-500 tracking-wide">
+                    {{ product.stars_display }}
+                </div>
+                <span class="font-bold text-stone-900">{{ product.average_rating|default:"5.0" }}</span>
+                <span class="text-stone-400">({{ product.reviews_count|default:"14" }} verified customer reviews)</span>
+            </div>
+
+            <!-- Price Box -->
+            <div class="bg-linen/50 p-4 rounded-2xl border border-stone-200/80 mb-6 flex items-baseline justify-between">
+                <div>
+                    <span id="displayPrice" class="text-3xl font-bold text-navy">Rs. {{ default_variant.effective_price|default:product.base_price|floatformat:0 }}</span>
+                    {% if product.compare_at_price %}
+                    <span id="displayComparePrice" class="text-sm text-stone-400 line-through ml-2">Rs. {{ product.compare_at_price|floatformat:0 }}</span>
+                    {% endif %}
+                </div>
+                <div class="text-right">
+                    <span id="displaySavingBadge" class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
+                        {% if product.discount_percent > 0 %}Save {{ product.discount_percent }}%{% else %}Best Value{% endif %}
+                    </span>
+                    <span class="block text-[10px] text-stone-500 mt-0.5">Tax Included &bull; COD Available</span>
+                </div>
+            </div>
+
+            <!-- Short Summary -->
+            <p class="text-sm text-stone-600 mb-6 leading-relaxed">
+                {{ product.short_description }}
+            </p>
+
+            <!-- Select Size -->
+            {% if available_sizes %}
+            <div class="mb-5">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-stone-800">Select Bed Size</label>
+                    <a href="{% url 'pages:detail' slug='size-guide' %}" target="_blank" class="text-xs text-terracotta underline font-medium">Size Guide & Dimensions</a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="sizeOptions">
+                    {% for size in available_sizes %}
+                    <button type="button" onclick="selectSize({{ size.id }}, this)" class="size-btn py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition {% if forloop.first %}border-navy bg-navy text-white shadow-sm{% else %}border-stone-300 text-stone-700 hover:border-navy{% endif %}" data-size-id="{{ size.id }}">
+                        <span class="block">{{ size.name }}</span>
+                        {% if size.dimensions %}
+                        <span class="block text-[10px] font-normal opacity-75">{{ size.dimensions|truncatechars:18 }}</span>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Select Color -->
+            {% if available_colors %}
+            <div class="mb-6">
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-800 mb-2">
+                    Fabric Color: <span id="selectedColorName" class="font-normal text-stone-600">{{ available_colors.0.name }}</span>
+                </label>
+                <div class="flex space-x-3" id="colorOptions">
+                    {% for col in available_colors %}
+                    <button type="button" onclick="selectColor({{ col.id }}, '{{ col.name }}', this)" class="color-btn relative w-9 h-9 rounded-full border-2 transition {% if forloop.first %}border-navy scale-110 ring-2 ring-navy/20{% else %}border-stone-300 hover:scale-105{% endif %}" style="background-color: {{ col.hex_code }};" title="{{ col.name }}" data-color-id="{{ col.id }}">
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quantity Discounts Widget (Multi-buy savings) -->
+            {% if quantity_discounts %}
+            <div class="mb-5 p-3.5 bg-gradient-to-r from-amber-50 to-orange-50/60 rounded-2xl border border-amber-200">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center space-x-1.5">
+                        <span>🔥</span>
+                        <span>Quantity Discounts / Buy More &amp; Save</span>
+                    </span>
+                    <span class="text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">Auto-applied in cart</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {% for qd in quantity_discounts %}
+                    <button type="button" onclick="applyQuantityTier({{ qd.min_quantity }}, this)"
+                        class="quantity-tier-btn text-left p-2.5 rounded-xl border border-amber-300 bg-white hover:border-terracotta hover:bg-amber-100/50 transition group cursor-pointer">
+                        <span class="block text-xs font-bold text-navy group-hover:text-terracotta">Buy {{ qd.min_quantity }}+ Items</span>
+                        <span class="block text-[11px] font-bold text-emerald-700">Save {{ qd.discount_percentage|floatformat:0 }}% Off</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quantity & Actions -->
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center space-x-2.5 sm:space-x-4">
+                    <div class="flex items-center border border-stone-300 rounded-xl overflow-hidden bg-white shrink-0">
+                        <button type="button" onclick="changeQuantity(-1)" class="px-2.5 sm:px-3.5 py-2.5 sm:py-3 text-stone-600 hover:bg-stone-100 font-bold text-sm">&minus;</button>
+                        <input type="text" id="productQuantity" value="1" readonly class="w-10 sm:w-12 text-center text-xs sm:text-sm font-bold text-navy focus:outline-none" />
+                        <button type="button" onclick="changeQuantity(1)" class="px-2.5 sm:px-3.5 py-2.5 sm:py-3 text-stone-600 hover:bg-stone-100 font-bold text-sm">&plus;</button>
+                    </div>
+
+                    <!-- Add To Bag Button -->
+                    <button type="button" onclick="handleAddToBag()" class="flex-1 min-w-0 bg-navy hover:bg-opacity-95 text-white font-bold py-3 sm:py-3.5 px-3 sm:px-6 rounded-xl shadow-lg transition flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="truncate">Add to Bag</span>
+                    </button>
+                </div>
+
+                <!-- Multi-Item Customization Section (Shown when Quantity >= 2) -->
+                <div id="multiItemCustomizer" class="hidden p-4 sm:p-5 bg-gradient-to-br from-amber-50/60 via-white to-linen rounded-2xl border-2 border-terracotta/30 shadow-md space-y-3.5 transition-all duration-300">
+                    <div class="flex items-center justify-between pb-2.5 border-b border-sand">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-full bg-terracotta text-white flex items-center justify-center text-xs font-bold shadow-sm">✨</span>
+                            <div>
+                                <h4 class="font-serif font-bold text-navy text-sm">Select Size &amp; Color for Each Item</h4>
+                                <p class="text-[11px] text-stone-500">Customize different bed sizes and fabric colors for your items:</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] bg-terracotta/10 text-terracotta font-bold px-2.5 py-1 rounded-full border border-terracotta/20 shrink-0">
+                            <span id="multiItemCount">2</span> Items
+                        </span>
+                    </div>
+
+                    <!-- Dynamic Item Cards Container -->
+                    <div id="multiItemCardsList" class="space-y-3">
+                        <!-- Populated dynamically via Javascript based on quantity -->
+                    </div>
+                </div>
+
+                <!-- Instant Buy Now (COD) Form -->
+                <form id="buyNowForm" action="{% url 'orders:buy_now' %}" method="POST">
+                    {% csrf_token %}
+                    <div id="buyNowInputsContainer">
+                        <input type="hidden" name="variant_id" id="buyNowVariantId" value="{{ default_variant.id }}" />
+                        <input type="hidden" name="quantity" id="buyNowQuantity" value="1" />
+                    </div>
+                    <button type="submit" class="w-full bg-terracotta hover:bg-opacity-90 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                        <span>⚡ Buy Now</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order & Delivery Timeline Card -->
+            <div class="bg-[#FAFAFA] p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-200 mb-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <!-- Icon and Connecting Line Row -->
+                <div class="flex items-center justify-between">
+                    <!-- Step 1: Bag Icon -->
+                    <div class="flex-shrink-0 w-6 sm:w-7 flex justify-start">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+
+                    <!-- Connector Line 1 -->
+                    <div class="flex items-center flex-1 mx-1.5 sm:mx-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-stone-900 shrink-0"></span>
+                        <span class="h-[1.5px] bg-stone-900 flex-1"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-stone-900 shrink-0"></span>
+                    </div>
+
+                    <!-- Step 2: Truck Icon -->
+                    <div class="flex-shrink-0 w-6 sm:w-7 flex justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" />
+                        </svg>
+                    </div>
+
+                    <!-- Connector Line 2 -->
+                    <div class="flex items-center flex-1 mx-1.5 sm:mx-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-stone-900 shrink-0"></span>
+                        <span class="h-[1.5px] bg-stone-900 flex-1"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-stone-900 shrink-0"></span>
+                    </div>
+
+                    <!-- Step 3: Location Pin Icon -->
+                    <div class="flex-shrink-0 w-6 sm:w-7 flex justify-end">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Labels Row -->
+                <div class="flex justify-between items-start mt-2 pt-1 font-sans">
+                    <div class="flex-1 text-left min-w-0 pr-1">
+                        <span id="timelinePurchasedDate" class="block font-bold text-[11px] sm:text-xs md:text-sm text-stone-900 truncate">Oct 20</span>
+                        <span class="block text-[10px] sm:text-xs text-stone-600 mt-0.5 truncate">Purchased</span>
+                    </div>
+                    <div class="flex-1 text-center min-w-0 px-1">
+                        <span id="timelineShippedDate" class="block font-bold text-[11px] sm:text-xs md:text-sm text-stone-900 truncate">Oct 20 – 21</span>
+                        <span class="block text-[10px] sm:text-xs text-stone-600 mt-0.5 truncate">Order Shipped</span>
+                    </div>
+                    <div class="flex-1 text-right min-w-0 pl-1">
+                        <span id="timelineDeliveredDate" class="block font-bold text-[11px] sm:text-xs md:text-sm text-stone-900 truncate">Oct 23 – 26</span>
+                        <span class="block text-[10px] sm:text-xs text-stone-600 mt-0.5 truncate">Delivered</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Confidence Guarantees Card -->
+            <div class="bg-[#FAFAFA] py-3.5 px-2 sm:px-4 rounded-xl sm:rounded-2xl border border-stone-200 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div class="grid grid-cols-3 items-center">
+                    <!-- Feature 1: 30-Days Easy Return -->
+                    <div class="text-center px-1 sm:px-2">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900 mx-auto mb-1.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14L4 9l5-5" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 9h11a5 5 0 015 5v1" />
+                        </svg>
+                        <span class="block text-[10px] sm:text-xs font-medium text-stone-900 leading-tight">30-Days Easy Return</span>
+                    </div>
+
+                    <!-- Feature 2: Fast Door Step Delivery -->
+                    <div class="text-center px-1 sm:px-2 border-x border-stone-300">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900 mx-auto mb-1.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" />
+                        </svg>
+                        <span class="block text-[10px] sm:text-xs font-medium text-stone-900 leading-tight">Fast Door Step Delivery</span>
+                    </div>
+
+                    <!-- Feature 3: Safe & Secure Payments -->
+                    <div class="text-center px-1 sm:px-2">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-stone-900 mx-auto mb-1.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <span class="block text-[10px] sm:text-xs font-medium text-stone-900 leading-tight">Safe & Secure Payments</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabbed Content (Description, Care, Dimensions, Reviews) -->
+    <div class="mt-10 sm:mt-16 pt-8 sm:pt-10 border-t border-stone-200">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-6 sm:gap-8 border-b border-stone-200 overflow-x-auto no-scrollbar">
+                <button type="button" onclick="switchTab('desc', this)" class="tab-btn pb-3 border-b-2 border-terracotta text-navy text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors">
+                    Product Description
+                </button>
+                <button type="button" onclick="switchTab('care', this)" class="tab-btn pb-3 border-b-2 border-transparent text-stone-500 hover:text-navy text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors">
+                    Material & Care
+                </button>
+                <button type="button" onclick="switchTab('reviews', this)" class="tab-btn pb-3 border-b-2 border-transparent text-stone-500 hover:text-navy text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors">
+                    Customer Reviews ({{ product.reviews_count|default:"14" }})
+                </button>
+            </div>
+
+            <!-- Tab 1: Description -->
+            <div id="tabContent_desc" class="py-6 text-stone-700 leading-relaxed text-sm">
+                {{ product.description|safe }}
+            </div>
+
+            <!-- Tab 2: Care -->
+            <div id="tabContent_care" class="py-6 text-stone-700 leading-relaxed text-sm hidden space-y-4">
+                <h4 class="font-bold text-navy">Fabric Composition & Specifications:</h4>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Material:</strong> {{ product.material }}</li>
+                    <li><strong>Thread Count:</strong> {{ product.thread_count }}</li>
+                    <li><strong>Package Contents:</strong> {{ product.pieces_included }}</li>
+                </ul>
+                <h4 class="font-bold text-navy mt-4">Washing & Ironing Guide:</h4>
+                <p>{{ product.care_instructions }}</p>
+            </div>
+
+            <!-- Tab 3: Reviews -->
+            <div id="tabContent_reviews" class="py-6 text-stone-700 text-sm hidden space-y-6">
+                <!-- Submit Review Form -->
+                {% if user.is_authenticated %}
+                <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200 mb-8">
+                    <h4 class="font-bold font-serif text-navy text-base mb-3">Write a Customer Review</h4>
+                    <form action="{% url 'reviews:submit' product_id=product.id %}" method="POST" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-xs font-semibold mb-1 text-stone-700">Your Rating</label>
+                            <select name="rating" class="text-xs sm:text-sm p-2.5 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-navy focus:outline-none">
+                                <option value="5" selected>★★★★★ (5 Stars - Excellent)</option>
+                                <option value="4.5">★★★★½ (4.5 Stars - Outstanding)</option>
+                                <option value="4">★★★★☆ (4 Stars - Good)</option>
+                                <option value="3.5">★★★½☆ (3.5 Stars - Very Good)</option>
+                                <option value="3">★★★☆☆ (3 Stars - Average)</option>
+                                <option value="2.5">★★½☆☆ (2.5 Stars - Fair)</option>
+                                <option value="2">★★☆☆☆ (2 Stars - Below Average)</option>
+                                <option value="1.5">★½☆☆☆ (1.5 Stars - Poor)</option>
+                                <option value="1">★☆☆☆☆ (1 Star - Very Poor)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="text" name="title" placeholder="Review headline e.g. Super soft bed sheet!" required class="w-full text-xs sm:text-sm p-3 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-navy focus:outline-none" />
+                        </div>
+                        <div>
+                            <textarea name="comment" rows="3" placeholder="Tell us about the cotton quality, wash feel, and delivery..." required class="w-full text-xs sm:text-sm p-3 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-navy focus:outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="bg-navy hover:bg-terracotta text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-xl transition shadow-sm">
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="p-4 bg-linen rounded-xl text-xs sm:text-sm text-stone-600 mb-6">
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="font-bold text-navy underline">Log in</a> to write a verified buyer review.
+                </div>
+                {% endif %}
+
+                <!-- Existing Reviews List -->
+                <div class="space-y-4 divide-y divide-stone-100">
+                    {% for rev in reviews %}
+                    <div class="pt-4 first:pt-0">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="text-amber-500 text-xs sm:text-sm tracking-wide">{{ rev.stars_display }}</span>
+                            <span class="text-stone-400 text-[11px]">({{ rev.rating }}★)</span>
+                            <span class="font-bold text-navy text-xs sm:text-sm">{{ rev.title }}</span>
+                        </div>
+                        <p class="text-stone-600 text-xs sm:text-sm leading-relaxed mb-2">{{ rev.comment }}</p>
+                        <div class="text-[11px] text-stone-400 flex items-center space-x-2">
+                            <span>{{ rev.user.full_name|default:rev.user.username|default:"Customer" }}</span>
+                            <span>&bull;</span>
+                            <span class="text-emerald-700 font-medium">✓ Verified Buyer</span>
+                            <span>&bull;</span>
+                            <span>{{ rev.created_at|date:"d M, Y" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-stone-400 text-xs">No reviews submitted yet. Be the first to review!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-20 pt-10 border-t border-stone-200">
+        <h3 class="text-2xl font-serif font-bold text-navy mb-8 text-center sm:text-left">Complete The Bedding Set</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {% for rel_prod in related_products %}
+            {% include 'partials/_product_card.html' with product=rel_prod %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Compact FAQ Section -->
+    <div class="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-stone-200">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-5 sm:mb-6">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-terracotta">Need Help?</span>
+                <h3 class="text-lg sm:text-xl font-serif font-bold text-navy mt-0.5">Frequently Asked Questions</h3>
+            </div>
+
+            <div class="space-y-2">
+                <details class="group bg-white p-3.5 sm:p-4 rounded-xl border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition">
+                    <summary class="flex justify-between items-center cursor-pointer font-semibold text-navy text-xs sm:text-sm list-none select-none">
+                        <span>How does Cash on Delivery (COD) work?</span>
+                        <span class="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-open:bg-navy group-open:text-white transition shrink-0 ml-2">
+                            <svg class="w-3 h-3 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <p class="text-stone-600 text-xs mt-2.5 pt-2 border-t border-stone-100 leading-relaxed">
+                        Pay cash directly to the courier rider upon delivery. No upfront payment or cards required.
+                    </p>
+                </details>
+
+                <details class="group bg-white p-3.5 sm:p-4 rounded-xl border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition">
+                    <summary class="flex justify-between items-center cursor-pointer font-semibold text-navy text-xs sm:text-sm list-none select-none">
+                        <span>Will this bed sheet fit my mattress size and depth?</span>
+                        <span class="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-open:bg-navy group-open:text-white transition shrink-0 ml-2">
+                            <svg class="w-3 h-3 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <p class="text-stone-600 text-xs mt-2.5 pt-2 border-t border-stone-100 leading-relaxed">
+                        Yes! Fitted sheets feature 12–14 inch deep elastic pockets. King is 96×100 in, Queen is 90×100 in, and Single is 60×90 in.
+                    </p>
+                </details>
+
+                <details class="group bg-white p-3.5 sm:p-4 rounded-xl border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition">
+                    <summary class="flex justify-between items-center cursor-pointer font-semibold text-navy text-xs sm:text-sm list-none select-none">
+                        <span>How do I wash and care for this fabric?</span>
+                        <span class="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-open:bg-navy group-open:text-white transition shrink-0 ml-2">
+                            <svg class="w-3 h-3 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <p class="text-stone-600 text-xs mt-2.5 pt-2 border-t border-stone-100 leading-relaxed">
+                        Machine wash cold or warm (max 40°C) with gentle detergent. Avoid bleach to preserve fabric softness and color.
+                    </p>
+                </details>
+
+                <details class="group bg-white p-3.5 sm:p-4 rounded-xl border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition">
+                    <summary class="flex justify-between items-center cursor-pointer font-semibold text-navy text-xs sm:text-sm list-none select-none">
+                        <span>What is the return and exchange policy?</span>
+                        <span class="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 group-open:bg-navy group-open:text-white transition shrink-0 ml-2">
+                            <svg class="w-3 h-3 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <p class="text-stone-600 text-xs mt-2.5 pt-2 border-t border-stone-100 leading-relaxed">
+                        We offer a 30-Day Easy Exchange &amp; Return guarantee. Simply contact us via WhatsApp for a quick swap or refund.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Mobile Add to Cart Bar -->
+<div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-stone-200 px-4 py-3 flex sm:hidden items-center justify-between z-30 shadow-2xl" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+    <div class="flex-1 min-w-0 mr-3">
+        <span class="text-[10px] text-stone-500 block truncate">{{ product.name }}</span>
+        <span id="mobileStickyPrice" class="font-bold text-navy text-sm">Rs. {{ default_variant.effective_price|default:product.base_price|floatformat:0 }}</span>
+    </div>
+    <div class="flex space-x-2 flex-shrink-0">
+        <button type="button" onclick="handleAddToBag()" class="bg-navy text-white text-xs font-bold px-3 sm:px-4 py-2.5 rounded-lg whitespace-nowrap">
+            Add to Bag
+        </button>
+        <button type="button" onclick="document.querySelector('form[action*=\'buy-now\'] button').click()" class="bg-terracotta text-white text-xs font-bold px-3 sm:px-4 py-2.5 rounded-lg whitespace-nowrap">
+            Buy Now
+        </button>
+    </div>
+</div>
+
+<script>
+let currentVariantId = {{ default_variant.id|default:"null" }};
+let selectedSizeId = {% if available_sizes %}{{ available_sizes.0.id }}{% else %}null{% endif %};
+let selectedColorId = {% if available_colors %}{{ available_colors.0.id }}{% else %}null{% endif %};
+
+// Pre-rendered variant lookup table for instant zero-latency image and price switching
+const VARIANTS_DATA = [
+    {% for v in variants %}
+    {
+        id: {{ v.id }},
+        sizeId: {% if v.size %}{{ v.size.id }}{% else %}null{% endif %},
+        colorId: {% if v.color %}{{ v.color.id }}{% else %}null{% endif %},
+        price: {{ v.effective_price }},
+        comparePrice: {% if v.effective_compare_at_price %}{{ v.effective_compare_at_price }}{% else %}null{% endif %},
+        imageUrl: "{% if v.image and v.image.image %}{{ v.image.image.url }}{% endif %}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+function selectThumbnail(imageUrl, btn) {
+    const mainImg = document.getElementById('mainProductImage');
+    if (mainImg && imageUrl) {
+        mainImg.src = imageUrl;
+    }
+    document.querySelectorAll('.thumbnail-btn').forEach(b => {
+        b.classList.remove('border-navy', 'ring-2', 'ring-navy/20');
+        b.classList.add('border-stone-200');
+    });
+    if (btn) {
+        btn.classList.remove('border-stone-200');
+        btn.classList.add('border-navy', 'ring-2', 'ring-navy/20');
+    }
+}
+
+function updateVariantUI() {
+    const match = VARIANTS_DATA.find(v => {
+        const sizeMatch = (selectedSizeId === null) || (v.sizeId === selectedSizeId);
+        const colorMatch = (selectedColorId === null) || (v.colorId === selectedColorId);
+        return sizeMatch && colorMatch;
+    });
+
+    if (match) {
+        currentVariantId = match.id;
+        const buyNowInput = document.getElementById('buyNowVariantId');
+        if (buyNowInput) buyNowInput.value = match.id;
+
+        const priceEl = document.getElementById('displayPrice');
+        if (priceEl) priceEl.textContent = `Rs. ${Math.round(match.price).toLocaleString()}`;
+
+        const mobileStickyPrice = document.getElementById('mobileStickyPrice');
+        if (mobileStickyPrice) mobileStickyPrice.textContent = `Rs. ${Math.round(match.price).toLocaleString()}`;
+
+        const compEl = document.getElementById('displayComparePrice');
+        if (compEl) {
+            if (match.comparePrice && match.comparePrice > match.price) {
+                compEl.textContent = `Rs. ${Math.round(match.comparePrice).toLocaleString()}`;
+                compEl.style.display = 'inline';
+            } else {
+                compEl.style.display = 'none';
+            }
+        }
+
+        const savingBadge = document.getElementById('displaySavingBadge');
+        if (savingBadge) {
+            if (match.comparePrice && match.comparePrice > match.price) {
+                const pct = Math.round(((match.comparePrice - match.price) / match.comparePrice) * 100);
+                savingBadge.textContent = `Save ${pct}%`;
+                savingBadge.style.display = 'inline-block';
+            } else {
+                savingBadge.textContent = 'Best Value';
+            }
+        }
+
+        if (match.imageUrl) {
+            const mainImg = document.getElementById('mainProductImage');
+            if (mainImg) mainImg.src = match.imageUrl;
+
+            // Highlight corresponding thumbnail
+            document.querySelectorAll('.thumbnail-btn').forEach(tb => {
+                if (tb.dataset.src === match.imageUrl) {
+                    tb.classList.remove('border-stone-200');
+                    tb.classList.add('border-navy', 'ring-2', 'ring-navy/20');
+                } else {
+                    tb.classList.remove('border-navy', 'ring-2', 'ring-navy/20');
+                    tb.classList.add('border-stone-200');
+                }
+            });
+        }
+    }
+}
+
+// Multi-item customizer state
+const ALL_SIZES = [
+    {% for size in available_sizes %}
+    { id: {{ size.id }}, name: "{{ size.name }}", dimensions: "{{ size.dimensions|default:'' }}" }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+const ALL_COLORS = [
+    {% for col in available_colors %}
+    { id: {{ col.id }}, name: "{{ col.name }}", hex: "{{ col.hex_code }}" }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+let multiItemSelections = [];
+
+function findVariantFor(sizeId, colorId) {
+    let match = VARIANTS_DATA.find(v => {
+        const sMatch = (sizeId === null || v.sizeId === sizeId);
+        const cMatch = (colorId === null || v.colorId === colorId);
+        return sMatch && cMatch;
+    });
+    if (!match && VARIANTS_DATA.length > 0) {
+        match = VARIANTS_DATA.find(v => v.sizeId === sizeId) || VARIANTS_DATA[0];
+    }
+    return match;
+}
+
+function updateMultiItemSection(qty) {
+    const customizer = document.getElementById('multiItemCustomizer');
+    const countEl = document.getElementById('multiItemCount');
+    const listEl = document.getElementById('multiItemCardsList');
+    if (!customizer || !listEl) return;
+
+    if (qty <= 1) {
+        customizer.classList.add('hidden');
+        multiItemSelections = [];
+        syncBuyNowInputs();
+        return;
+    }
+
+    customizer.classList.remove('hidden');
+    if (countEl) countEl.textContent = qty;
+
+    // Ensure multiItemSelections array has exact `qty` elements
+    while (multiItemSelections.length < qty) {
+        const idx = multiItemSelections.length;
+        const defaultSize = (idx === 0 && selectedSizeId) ? selectedSizeId : (ALL_SIZES[idx % ALL_SIZES.length]?.id || ALL_SIZES[0]?.id);
+        const defaultColor = (idx === 0 && selectedColorId) ? selectedColorId : (ALL_COLORS[idx % ALL_COLORS.length]?.id || ALL_COLORS[0]?.id);
+        const matchedVar = findVariantFor(defaultSize, defaultColor);
+        multiItemSelections.push({
+            sizeId: defaultSize,
+            colorId: defaultColor,
+            variantId: matchedVar ? matchedVar.id : currentVariantId
+        });
+    }
+
+    if (multiItemSelections.length > qty) {
+        multiItemSelections = multiItemSelections.slice(0, qty);
+    }
+
+    renderMultiItemCards();
+    syncBuyNowInputs();
+}
+
+function renderMultiItemCards() {
+    const listEl = document.getElementById('multiItemCardsList');
+    if (!listEl) return;
+
+    listEl.innerHTML = multiItemSelections.map((item, idx) => {
+        const itemNum = idx + 1;
+        const matchedVar = VARIANTS_DATA.find(v => v.id === item.variantId) || {};
+        const priceStr = matchedVar.price ? `Rs. ${Math.round(matchedVar.price).toLocaleString()}` : '';
+
+        const sizeOptionsHtml = ALL_SIZES.map(s => `
+            <option value="${s.id}" ${s.id === item.sizeId ? 'selected' : ''}>
+                ${s.name} ${s.dimensions ? '(' + s.dimensions.substring(0, 16) + ')' : ''}
+            </option>
+        `).join('');
+
+        const colorOptionsHtml = ALL_COLORS.map(c => `
+            <option value="${c.id}" ${c.id === item.colorId ? 'selected' : ''}>
+                ${c.name}
+            </option>
+        `).join('');
+
+        return `
+            <div class="bg-white p-3.5 rounded-xl border border-stone-200/90 shadow-sm space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-xs text-navy flex items-center space-x-2">
+                        <span class="w-5 h-5 rounded-full bg-navy text-white text-[10px] flex items-center justify-center font-bold">${itemNum}</span>
+                        <span>Item #${itemNum}</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-terracotta bg-sand/40 px-2 py-0.5 rounded-md" id="itemSummary_${idx}">
+                        ${priceStr}
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1">Bed Size</label>
+                        <select onchange="onItemConfigChange(${idx}, 'size', this.value)" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-semibold text-navy focus:outline-none focus:ring-1 focus:ring-terracotta">
+                            ${sizeOptionsHtml}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1">Fabric Color</label>
+                        <select onchange="onItemConfigChange(${idx}, 'color', this.value)" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-semibold text-navy focus:outline-none focus:ring-1 focus:ring-terracotta">
+                            ${colorOptionsHtml}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function onItemConfigChange(idx, type, value) {
+    const valInt = parseInt(value);
+    if (type === 'size') {
+        multiItemSelections[idx].sizeId = valInt;
+    } else if (type === 'color') {
+        multiItemSelections[idx].colorId = valInt;
+    }
+
+    const matchedVar = findVariantFor(multiItemSelections[idx].sizeId, multiItemSelections[idx].colorId);
+    if (matchedVar) {
+        multiItemSelections[idx].variantId = matchedVar.id;
+        const summaryEl = document.getElementById(`itemSummary_${idx}`);
+        if (summaryEl) {
+            summaryEl.textContent = `Rs. ${Math.round(matchedVar.price).toLocaleString()}`;
+        }
+    }
+
+    syncBuyNowInputs();
+}
+
+function syncBuyNowInputs() {
+    const container = document.getElementById('buyNowInputsContainer');
+    if (!container) return;
+
+    if (multiItemSelections.length >= 2) {
+        container.innerHTML = multiItemSelections.map(item => `
+            <input type="hidden" name="variant_ids" value="${item.variantId}" />
+        `).join('');
+    } else {
+        container.innerHTML = `
+            <input type="hidden" name="variant_id" id="buyNowVariantId" value="${currentVariantId}" />
+            <input type="hidden" name="quantity" id="buyNowQuantity" value="1" />
+        `;
+    }
+}
+
+function applyQuantityTier(qty, btn) {
+    const input = document.getElementById('productQuantity');
+    if (input) input.value = qty;
+
+    const buyNowQty = document.getElementById('buyNowQuantity');
+    if (buyNowQty) buyNowQty.value = qty;
+
+    document.querySelectorAll('.quantity-tier-btn').forEach(b => {
+        b.classList.remove('border-terracotta', 'ring-2', 'ring-terracotta/30', 'bg-amber-100');
+        b.classList.add('border-amber-300', 'bg-white');
+    });
+
+    if (btn) {
+        btn.classList.remove('border-amber-300', 'bg-white');
+        btn.classList.add('border-terracotta', 'ring-2', 'ring-terracotta/30', 'bg-amber-100');
+    }
+
+    updateMultiItemSection(qty);
+
+    if (typeof showToast === 'function') {
+        showToast(`Quantity set to ${qty} (bulk savings tier activated)!`, 'success');
+    }
+}
+
+function selectSize(sizeId, btn) {
+    selectedSizeId = sizeId;
+    document.querySelectorAll('.size-btn').forEach(b => {
+        b.className = 'size-btn py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition border-stone-300 text-stone-700 hover:border-navy';
+    });
+    btn.className = 'size-btn py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition border-navy bg-navy text-white shadow-sm';
+    updateVariantUI();
+    fetchVariantDetails();
+
+    // Update Item #1 if multi-item is active
+    if (multiItemSelections.length >= 1) {
+        multiItemSelections[0].sizeId = sizeId;
+        const matched = findVariantFor(sizeId, multiItemSelections[0].colorId);
+        if (matched) multiItemSelections[0].variantId = matched.id;
+        renderMultiItemCards();
+        syncBuyNowInputs();
+    }
+}
+
+function selectColor(colorId, colorName, btn) {
+    selectedColorId = colorId;
+    const colorNameEl = document.getElementById('selectedColorName');
+    if (colorNameEl) colorNameEl.textContent = colorName;
+    document.querySelectorAll('.color-btn').forEach(b => {
+        b.className = 'color-btn relative w-9 h-9 rounded-full border-2 transition border-stone-300 hover:scale-105';
+    });
+    btn.className = 'color-btn relative w-9 h-9 rounded-full border-2 transition border-navy scale-110 ring-2 ring-navy/20';
+    updateVariantUI();
+    fetchVariantDetails();
+
+    // Update Item #1 if multi-item is active
+    if (multiItemSelections.length >= 1) {
+        multiItemSelections[0].colorId = colorId;
+        const matched = findVariantFor(multiItemSelections[0].sizeId, colorId);
+        if (matched) multiItemSelections[0].variantId = matched.id;
+        renderMultiItemCards();
+        syncBuyNowInputs();
+    }
+}
+
+function fetchVariantDetails() {
+    const url = `/api/variant-info/?product_id={{ product.id }}&size_id=${selectedSizeId || ''}&color_id=${selectedColorId || ''}`;
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                currentVariantId = data.variant_id;
+                const buyNowInput = document.getElementById('buyNowVariantId');
+                if (buyNowInput) buyNowInput.value = data.variant_id;
+
+                const priceEl = document.getElementById('displayPrice');
+                if (priceEl) priceEl.textContent = `Rs. ${Math.round(data.price).toLocaleString()}`;
+
+                const mobileStickyPrice = document.getElementById('mobileStickyPrice');
+                if (mobileStickyPrice) mobileStickyPrice.textContent = `Rs. ${Math.round(data.price).toLocaleString()}`;
+
+                const compEl = document.getElementById('displayComparePrice');
+                if (compEl) {
+                    if (data.compare_at_price) {
+                        compEl.textContent = `Rs. ${Math.round(data.compare_at_price).toLocaleString()}`;
+                        compEl.style.display = 'inline';
+                    } else {
+                        compEl.style.display = 'none';
+                    }
+                }
+                if (data.image_url) {
+                    const mainImg = document.getElementById('mainProductImage');
+                    if (mainImg) mainImg.src = data.image_url;
+                }
+            }
+        })
+        .catch(err => {
+            console.log("Variant fetch fallback:", err);
+        });
+}
+
+function changeQuantity(delta) {
+    const input = document.getElementById('productQuantity');
+    if (!input) return;
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    input.value = val;
+
+    const buyNowQty = document.getElementById('buyNowQuantity');
+    if (buyNowQty) buyNowQty.value = val;
+
+    updateMultiItemSection(val);
+}
+
+function handleAddToBag() {
+    const qty = parseInt(document.getElementById('productQuantity').value) || 1;
+
+    // Multi-Item batch add (Quantity >= 2)
+    if (qty >= 2 && multiItemSelections.length >= 2) {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        multiItemSelections.forEach(item => {
+            formData.append('variant_ids', item.variantId);
+        });
+
+        fetch("{% url 'cart:add' %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof updateMiniCartDrawer === 'function') {
+                    updateMiniCartDrawer(data.drawer_html, data.cart_count);
+                }
+                if (typeof openMiniCart === 'function') {
+                    openMiniCart();
+                } else if (typeof toggleMiniCart === 'function') {
+                    toggleMiniCart();
+                }
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'success');
+                }
+            } else {
+                alert(data.message || 'Could not add items to bag');
+            }
+        })
+        .catch(err => {
+            console.error('Batch add error:', err);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'cart:add' %}";
+            form.innerHTML = `<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">` +
+                multiItemSelections.map(i => `<input type="hidden" name="variant_ids" value="${i.variantId}">`).join('');
+            document.body.appendChild(form);
+            form.submit();
+        });
+        return;
+    }
+
+    // Single item add (Quantity == 1)
+    if (!currentVariantId) {
+        if (typeof showToast === 'function') {
+            showToast("Please select your size and color options first.", "warning");
+        } else {
+            alert("Please select size and color options first.");
+        }
+        return;
+    }
+    if (typeof addToBag === 'function') {
+        addToBag(currentVariantId, qty);
+    } else {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'cart:add' %}";
+        form.innerHTML = `
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="hidden" name="variant_id" value="${currentVariantId}">
+            <input type="hidden" name="quantity" value="${qty}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function switchTab(tabKey, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('border-terracotta', 'text-navy');
+        b.classList.add('border-transparent', 'text-stone-500');
+    });
+    if (btn) {
+        btn.classList.remove('border-transparent', 'text-stone-500');
+        btn.classList.add('border-terracotta', 'text-navy');
+    }
+
+    ['desc', 'care', 'reviews'].forEach(k => {
+        const el = document.getElementById(`tabContent_${k}`);
+        if (el) {
+            if (k === tabKey) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    });
+}
+
+function updateDeliveryTimelineDates() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+
+    // 1. Purchased: today (e.g. Oct 20)
+    const pMonth = months[now.getMonth()];
+    const pDay = now.getDate();
+    const purchasedStr = `${pMonth} ${pDay}`;
+
+    // 2. Order Shipped: today to tomorrow (e.g. Oct 20 – 21)
+    const shipDate = new Date(now);
+    shipDate.setDate(shipDate.getDate() + 1);
+    const sMonth = months[shipDate.getMonth()];
+    const sDay = shipDate.getDate();
+    let shippedStr = '';
+    if (pMonth === sMonth) {
+        shippedStr = `${pMonth} ${pDay} – ${sDay}`;
+    } else {
+        shippedStr = `${pMonth} ${pDay} – ${sMonth} ${sDay}`;
+    }
+
+    // 3. Delivered: +3 to +6 days from today (e.g. Oct 23 – 26)
+    const delivStart = new Date(now);
+    delivStart.setDate(delivStart.getDate() + 3);
+    const delivEnd = new Date(now);
+    delivEnd.setDate(delivEnd.getDate() + 6);
+
+    const dStartMonth = months[delivStart.getMonth()];
+    const dStartDay = delivStart.getDate();
+    const dEndMonth = months[delivEnd.getMonth()];
+    const dEndDay = delivEnd.getDate();
+
+    let deliveredStr = '';
+    if (dStartMonth === dEndMonth) {
+        deliveredStr = `${dStartMonth} ${dStartDay} – ${dEndDay}`;
+    } else {
+        deliveredStr = `${dStartMonth} ${dStartDay} – ${dEndMonth} ${dEndDay}`;
+    }
+
+    const pEl = document.getElementById('timelinePurchasedDate');
+    if (pEl) pEl.textContent = purchasedStr;
+
+    const sEl = document.getElementById('timelineShippedDate');
+    if (sEl) sEl.textContent = shippedStr;
+
+    const dEl = document.getElementById('timelineDeliveredDate');
+    if (dEl) dEl.textContent = deliveredStr;
+}
+
+// Run immediately & on DOMContentLoaded
+updateDeliveryTimelineDates();
+document.addEventListener('DOMContentLoaded', function() {
+    updateVariantUI();
+    updateDeliveryTimelineDates();
+});
+</script>
+{% endblock %}

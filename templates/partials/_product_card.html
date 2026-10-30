@@ -1,0 +1,82 @@
+<div class="group relative bg-white rounded-2xl overflow-hidden border border-stone-200/80 hover:shadow-xl hover:border-stone-300 transition-all duration-300 flex flex-col">
+    
+    <!-- Image Box with Badges -->
+    <div class="relative aspect-square w-full bg-stone-100 overflow-hidden">
+        <a href="{{ product.get_absolute_url }}">
+            {% if product.primary_image %}
+            <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-sand text-stone-500 font-serif">{{ site_settings.store_name|default:'BeddingOrchid' }}</div>
+            {% endif %}
+        </a>
+
+        <!-- Overlay Sale Tags / Badges -->
+        <div class="absolute top-3 left-3 flex flex-col space-y-1.5 z-10 pointer-events-none">
+            {% for tag in product.sale_tags.all %}
+            <span class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-sm" style="background-color: {{ tag.background_color }}; color: {{ tag.text_color }};">
+                {{ tag.label }}
+            </span>
+            {% endfor %}
+            {% if product.discount_percent > 0 and not product.sale_tags.all %}
+            <span class="bg-red-600 text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md shadow-sm">
+                -{{ product.discount_percent }}% OFF
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Wishlist Button -->
+        <button type="button" onclick="toggleWishlist({{ product.id }}, this)" class="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm text-stone-600 hover:text-terracotta shadow-sm transition transform hover:scale-110 z-10" aria-label="Add to wishlist">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+        </button>
+
+        <!-- Quick Add Hover Overlay Button (Desktop) -->
+        <div class="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:block z-10">
+            {% if product.variants.first %}
+            <button type="button" onclick="addToBag({{ product.variants.first.id }}, 1)" class="w-full bg-navy/90 hover:bg-navy text-white text-xs font-semibold py-2.5 px-4 rounded-xl backdrop-blur-sm shadow-md transition">
+                + Quick Add (King)
+            </button>
+            {% else %}
+            <a href="{{ product.get_absolute_url }}" class="block text-center w-full bg-navy/90 hover:bg-navy text-white text-xs font-semibold py-2.5 px-4 rounded-xl backdrop-blur-sm shadow-md transition">
+                View Options
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="p-4 flex flex-col flex-grow">
+        <!-- Fabric & Thread Count Badge -->
+        <div class="text-[11px] font-medium text-stone-500 mb-1 flex items-center space-x-1">
+            <span>{{ product.thread_count }}</span>
+            <span>&bull;</span>
+            <span class="truncate">{{ product.material }}</span>
+        </div>
+
+        <!-- Title -->
+        <h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base leading-snug line-clamp-2 hover:text-terracotta transition mb-2">
+            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+        </h3>
+
+        <!-- Rating Stars -->
+        <div class="flex items-center space-x-1 text-amber-500 text-xs mb-2">
+            <span>★</span>
+            <span class="font-bold text-stone-800">{{ product.average_rating|default:"5.0" }}</span>
+            <span class="text-stone-400 text-[10px]">({{ product.reviews_count|default:"12" }})</span>
+        </div>
+
+        <!-- Prices -->
+        <div class="mt-auto pt-2 flex items-baseline justify-between border-t border-stone-100">
+            <div class="flex items-baseline space-x-2">
+                <span class="text-base sm:text-lg font-bold text-navy">Rs. {{ product.base_price|floatformat:0 }}</span>
+                {% if product.compare_at_price %}
+                <span class="text-xs text-stone-400 line-through">Rs. {{ product.compare_at_price|floatformat:0 }}</span>
+                {% endif %}
+            </div>
+            {% if product.discount_percent > 0 %}
+            <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Save {{ product.discount_percent }}%</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

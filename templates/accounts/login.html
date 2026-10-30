@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-xl space-y-6">
+        <div class="text-center">
+            <h1 class="text-2xl font-serif font-bold text-navy">Welcome Back</h1>
+            <p class="text-xs text-stone-500 mt-1">Sign in with your mobile phone or email</p>
+        </div>
+
+        <form method="POST" action="{% url 'accounts:login' %}" class="space-y-4">
+            {% csrf_token %}
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+
+            <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Mobile Phone or Email</label>
+                {{ form.username }}
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Password</label>
+                {{ form.password }}
+            </div>
+
+            <button type="submit" class="w-full bg-navy hover:bg-terracotta text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition">
+                Sign In &rarr;
+            </button>
+        </form>
+
+        <div class="text-center text-xs text-stone-500 pt-4 border-t border-stone-100">
+            Don't have an account yet?
+            <a href="{% url 'accounts:register' %}{% if next %}?next={{ next }}{% endif %}" class="font-bold text-terracotta underline ml-1">Create Account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

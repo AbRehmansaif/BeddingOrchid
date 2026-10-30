@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if is_bulk %}Bulk Shipping Labels ({{ orders|length }} Orders){% else %}Shipping Label - {{ order.order_number }}{% endif %}
+    </title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f8fafc;
+            color: #000000;
+            font-size: 11.5px;
+            line-height: 1.25;
+        }
+
+        /* Top Toolbar (Screen Only, Never Printed) */
+        .toolbar {
+            max-width: 760px;
+            margin: 0 auto 16px auto;
+            background: #ffffff;
+            border: 1.5px solid #000000;
+            padding: 10px 16px;
+            border-radius: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            background: #000000;
+            color: #ffffff;
+            border: 1.5px solid #000000;
+            padding: 6px 14px;
+            font-weight: 700;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn:hover {
+            background: #333333;
+        }
+        .btn-outline {
+            background: #ffffff;
+            color: #000000;
+            border: 1.5px solid #000000;
+            font-weight: 700;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        /* Layout Switcher */
+        .layout-selector {
+            display: inline-flex;
+            border: 1.5px solid #000000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .mode-btn {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-right: 1px solid #000000;
+            padding: 6px 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .mode-btn:last-child {
+            border-right: none;
+        }
+        .mode-btn.active {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        /* Base Parcel Label Container (Clean, Ink-Saving, NO SOLID BLACK BLOCKS) */
+        .shipping-label-wrapper {
+            max-width: 720px;
+            margin: 0 auto 12px auto;
+            background: #ffffff;
+            border: 1.5px solid #000000;
+            border-radius: 2px;
+            padding: 10px 14px;
+            color: #000000;
+        }
+
+        /* Header Grid */
+        .label-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .brand-title {
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #000000;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .brand-sub {
+            font-size: 9px;
+            color: #000000;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .shipper-info {
+            font-size: 9.5px;
+            color: #000000;
+            line-height: 1.25;
+            margin-top: 2px;
+        }
+
+        .label-title-box {
+            text-align: right;
+        }
+        .badge-awb {
+            display: inline-block;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 5px;
+            border-radius: 2px;
+        }
+        .order-number {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            color: #000000;
+            line-height: 1.1;
+        }
+        .order-date {
+            font-size: 9.5px;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        /* Clean Destination City & Courier Box */
+        .destination-bar {
+            background: #ffffff;
+            color: #000000;
+            border: 1.5px solid #000000;
+            padding: 5px 8px;
+            border-radius: 2px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .destination-city {
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000;
+        }
+        .routing-code {
+            font-size: 11.5px;
+            font-weight: 900;
+            color: #000000;
+            text-transform: uppercase;
+        }
+
+        /* Consignee / Delivery Details Box */
+        .consignee-box {
+            border: 1.5px solid #000000;
+            border-radius: 2px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            background: #ffffff;
+        }
+        .section-tag {
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 1px;
+        }
+        .consignee-name {
+            font-size: 15px;
+            font-weight: 900;
+            color: #000000;
+            line-height: 1.15;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        .consignee-phone-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1.5px solid #000000;
+            border-radius: 2px;
+            padding: 2px 6px;
+            margin: 2px 0 4px 0;
+        }
+        .consignee-phone {
+            font-size: 16.5px;
+            font-weight: 900;
+            color: #000000;
+            letter-spacing: 0.5px;
+            font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+        .consignee-address {
+            font-size: 12px;
+            font-weight: 800;
+            color: #000000;
+            line-height: 1.25;
+        }
+        .consignee-landmark {
+            font-size: 11px;
+            color: #000000;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Clean COD Collection Box */
+        .cod-box {
+            border: 2px solid #000000;
+            border-radius: 2px;
+            padding: 5px 8px;
+            background: #ffffff;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cod-label {
+            font-size: 11.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000;
+        }
+        .cod-warning {
+            font-size: 9px;
+            font-weight: 800;
+            color: #000000;
+            text-transform: uppercase;
+        }
+        .cod-amount {
+            font-size: 20px;
+            font-weight: 900;
+            color: #000000;
+            letter-spacing: -0.5px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* Dispatch & Courier Metadata */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .meta-col {
+            border: 1px solid #000000;
+            border-radius: 2px;
+            padding: 4px 6px;
+            background: #ffffff;
+        }
+        .meta-col h5 {
+            margin: 0 0 1px 0;
+            font-size: 8.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #000000;
+        }
+        .meta-col p {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 800;
+            color: #000000;
+        }
+
+        /* Clean Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000000;
+            margin-bottom: 6px;
+        }
+        .items-table th {
+            background: #ffffff;
+            color: #000000;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 3px 5px;
+            text-align: left;
+            border-bottom: 1.5px solid #000000;
+            border-right: 1px solid #000000;
+        }
+        .items-table th:last-child {
+            border-right: none;
+        }
+        .items-table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid #000000;
+            border-right: 1px solid #000000;
+            font-size: 10.5px;
+            color: #000000;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .items-table td:last-child {
+            border-right: none;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .items-table td.qty-col {
+            text-align: center;
+            font-weight: 900;
+            font-size: 12px;
+        }
+        .items-table td.sku-col {
+            font-family: ui-monospace, monospace;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        /* Special Instructions */
+        .instructions-box {
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            padding: 4px 6px;
+            font-size: 9.5px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #000000;
+            line-height: 1.25;
+        }
+
+
+        /* Footer */
+        .label-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #000000;
+            border-top: 1px solid #000000;
+            padding-top: 3px;
+            margin-top: 4px;
+        }
+
+        /* Dashed Cut Guide Line between labels on the same page */
+        .cut-guide {
+            display: none;
+            text-align: center;
+            margin: 4px auto;
+            max-width: 720px;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #000000;
+            border-top: 1.5px dashed #000000;
+            padding-top: 2px;
+        }
+
+        /* ========================================================
+           LAYOUT MODE 1: Standard 1 Per Page
+           ======================================================== */
+        body.layout-1-per-page .shipping-label-wrapper {
+            max-width: 740px;
+            margin: 0 auto 20px auto;
+            padding: 16px 18px;
+            font-size: 12.5px;
+        }
+        body.layout-1-per-page .brand-title { font-size: 20px; }
+        body.layout-1-per-page .order-number { font-size: 18px; }
+        body.layout-1-per-page .destination-city { font-size: 16px; }
+        body.layout-1-per-page .consignee-name { font-size: 17px; }
+        body.layout-1-per-page .consignee-phone { font-size: 19px; }
+        body.layout-1-per-page .cod-amount { font-size: 24px; }
+
+        /* ========================================================
+           LAYOUT MODE 2: Exactly 2 Invoices per Vertical A4 Paper
+           A4 usable = ~287mm (297mm - 5mm top - 5mm bottom)
+           2 x 140mm labels + ~4mm cut line = ~284mm (fits perfectly)
+           ======================================================== */
+        body.layout-2-per-page .shipping-label-wrapper {
+            max-width: 710px;
+            height: 140mm;
+            max-height: 140mm;
+            padding: 6px 12px;
+            margin: 0 auto;
+            font-size: 11px;
+            line-height: 1.25;
+            overflow: hidden;
+        }
+        body.layout-2-per-page .cut-guide-2 {
+            display: block;
+            height: 4mm;
+            max-width: 710px;
+            margin: 0 auto;
+        }
+        /* Injected by JS: zero-height page-break div between every pair */
+        body.layout-2-per-page .page-pair-break {
+            page-break-after: always;
+            break-after: page;
+            height: 0;
+            overflow: hidden;
+        }
+
+        /* ========================================================
+           LAYOUT MODE 3: Exactly 3 Invoices per Vertical A4 Paper
+           3 x 90mm labels + 2 x 3.5mm cut lines = ~277mm (fits perfectly)
+           ======================================================== */
+        body.layout-3-per-page .shipping-label-wrapper {
+            max-width: 710px;
+            height: 90mm;
+            max-height: 90mm;
+            padding: 4px 8px;
+            margin: 0 auto;
+            font-size: 9.5px;
+            line-height: 1.18;
+            overflow: hidden;
+        }
+        body.layout-3-per-page .cut-guide-3 {
+            display: block;
+            height: 3.5mm;
+            max-width: 710px;
+            margin: 0 auto;
+        }
+        /* Injected by JS: zero-height page-break div between every group of 3 */
+        body.layout-3-per-page .page-trio-break {
+            page-break-after: always;
+            break-after: page;
+            height: 0;
+            overflow: hidden;
+        }
+        body.layout-3-per-page .brand-title { font-size: 13.5px; }
+        body.layout-3-per-page .brand-sub { font-size: 8px; }
+        body.layout-3-per-page .shipper-info { font-size: 8px; line-height: 1.15; }
+        body.layout-3-per-page .order-number { font-size: 13px; }
+        body.layout-3-per-page .destination-bar { padding: 3px 6px; margin-bottom: 4px; }
+        body.layout-3-per-page .destination-city { font-size: 12px; }
+        body.layout-3-per-page .routing-code { font-size: 10px; }
+        body.layout-3-per-page .consignee-box { padding: 4px 6px; margin-bottom: 4px; }
+        body.layout-3-per-page .consignee-name { font-size: 12.5px; margin-bottom: 1px; }
+        body.layout-3-per-page .consignee-phone-box { padding: 1px 5px; margin: 1px 0 2px 0; }
+        body.layout-3-per-page .consignee-phone { font-size: 13.5px; }
+        body.layout-3-per-page .consignee-address { font-size: 10px; }
+        body.layout-3-per-page .cod-box { padding: 4px 6px; margin-bottom: 4px; }
+        body.layout-3-per-page .cod-label { font-size: 9.5px; }
+        body.layout-3-per-page .cod-warning { font-size: 7.5px; }
+        body.layout-3-per-page .cod-amount { font-size: 16px; }
+        body.layout-3-per-page .meta-grid { gap: 3px; margin-bottom: 4px; }
+        body.layout-3-per-page .meta-col { padding: 2px 4px; }
+        body.layout-3-per-page .items-table { margin-bottom: 4px; }
+        body.layout-3-per-page .items-table th, 
+        body.layout-3-per-page .items-table td { padding: 2px 4px; font-size: 8.5px; }
+        body.layout-3-per-page .instructions-box { padding: 2px 5px; font-size: 8.5px; margin-bottom: 4px; }
+        body.layout-3-per-page .label-footer { margin-top: 2px; font-size: 7.5px; }
+        body.layout-3-per-page .cut-guide-3 {
+            display: block;
+        }
+
+        /* ========================================================
+           PRINT MEDIA SPECIFICATIONS (Strict Page Bounds)
+           ======================================================== */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+
+            /* --- Print Mode 1: 1 per page --- */
+            body.layout-1-per-page .shipping-label-wrapper {
+                page-break-after: always !important;
+                break-after: page !important;
+                border: 1.5px solid #000000 !important;
+                padding: 10mm 12mm !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+            }
+            body.layout-1-per-page .shipping-label-wrapper:last-of-type {
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+
+            /* --- Print Mode 2: 2 per A4, via injected .page-pair-break div --- */
+            body.layout-2-per-page .shipping-label-wrapper {
+                height: 140mm !important;
+                max-height: 140mm !important;
+                overflow: hidden !important;
+                padding: 5mm 8mm !important;
+                margin: 0 auto !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                border: 1.5px solid #000000 !important;
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+            body.layout-2-per-page .cut-guide-2 {
+                display: block !important;
+                height: 4mm !important;
+                margin: 0 auto !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            body.layout-2-per-page .page-pair-break {
+                page-break-after: always !important;
+                break-after: page !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* --- Print Mode 3: 3 per A4, via injected .page-trio-break div --- */
+            body.layout-3-per-page .shipping-label-wrapper {
+                height: 90mm !important;
+                max-height: 90mm !important;
+                overflow: hidden !important;
+                padding: 3mm 5mm !important;
+                margin: 0 auto !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                border: 1.5px solid #000000 !important;
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+            body.layout-3-per-page .cut-guide-3 {
+                display: block !important;
+                height: 3.5mm !important;
+                margin: 0 auto !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            body.layout-3-per-page .page-trio-break {
+                page-break-after: always !important;
+                break-after: page !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 5mm 6mm;
+            }
+        }
+    </style>
+</head>
+<body class="layout-2-per-page">
+
+    <!-- Top Toolbar (Screen Only, Never Printed) -->
+    <div class="toolbar no-print">
+        <div>
+            <strong style="font-size: 13.5px; color: #000000;">Clean Monochrome Invoices ({{ orders|length }} Orders)</strong>
+            <span style="display: block; font-size: 11px; color: #475569;">
+                Select layout to fit multiple orders on 1 vertical A4 sheet:
+            </span>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <!-- 1 / 2 / 3 per page switcher -->
+            <div class="layout-selector">
+                <button type="button" onclick="setLayoutMode('1')" id="btn-mode-1" class="mode-btn" title="1 Invoice per A4 Sheet">
+                    1 Per Page
+                </button>
+                <button type="button" onclick="setLayoutMode('2')" id="btn-mode-2" class="mode-btn active" title="Fit 2 Invoices on 1 vertical A4 sheet (Half-A4)">
+                    ✂️ 2 Per A4 Sheet
+                </button>
+                <button type="button" onclick="setLayoutMode('3')" id="btn-mode-3" class="mode-btn" title="Fit 3 Invoices on 1 vertical A4 sheet (3-in-1 Compact)">
+                    ✂️ 3 Per A4 Sheet
+                </button>
+            </div>
+
+            <!-- Print Trigger -->
+            <button type="button" onclick="window.print()" class="btn">
+                🖨️ Print Now
+            </button>
+            <a href="/admin/orders/order/" class="btn btn-outline">
+                Back to Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- Iterate over Orders -->
+    {% for order in orders %}
+    <div class="shipping-label-wrapper" data-order-index="{{ forloop.counter }}" data-order-total="{{ orders|length }}">
+        
+        <!-- Header -->
+        <div class="label-header">
+            <div>
+                <div class="brand-title">{{ site_settings.store_name }}</div>
+                <div class="brand-sub">Twiltex Group &bull; Textile Exporters Since 2004</div>
+                <div class="shipper-info">
+                    <strong>Shipper / Return Warehouse:</strong> {{ site_settings.address }} &bull; Helpline: <strong>{{ site_settings.phone }}</strong>
+                </div>
+            </div>
+            <div class="label-title-box">
+                <span class="badge-awb">PARCEL AIRWAY BILL</span>
+                <div class="order-number">{{ order.order_number }}</div>
+                <div class="order-date">Date: {{ order.placed_at|date:"d-M-Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Clean Destination & Courier Box -->
+        <div class="destination-bar">
+            <div>
+                <span style="font-size: 8.5px; text-transform: uppercase; color: #000000; font-weight: 700; display: block;">DESTINATION CITY:</span>
+                <span class="destination-city">{{ order.shipping_city|default:"KARACHI" }}, {{ order.shipping_province|default:"PUNJAB" }}</span>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 8.5px; text-transform: uppercase; color: #000000; font-weight: 700; display: block;">COURIER:</span>
+                <span class="routing-code">{{ order.courier|default:"Trax / TCS / Leopards / PostEx" }}</span>
+            </div>
+        </div>
+
+        <!-- Consignee (Deliver To) Details -->
+        <div class="consignee-box">
+            <div class="section-tag">CONSIGNEE / DELIVER TO (CUSTOMER DETAILS):</div>
+            
+            <div class="consignee-name">
+                {{ order.shipping_full_name|default:order.customer_name|default:"Customer Name" }}
+            </div>
+
+            <div>
+                <div class="consignee-phone-box">
+                    <span style="font-size: 10px; font-weight: 900;">PHONE:</span>
+                    <span class="consignee-phone">
+                        {{ order.shipping_phone|default:order.customer_phone|default:"0300-0000000" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="consignee-address">
+                {{ order.shipping_address_line1|default:"Street Address" }}{% if order.shipping_address_line2 %}, {{ order.shipping_address_line2 }}{% endif %}
+            </div>
+
+            {% if order.shipping_landmark %}
+            <div class="consignee-landmark">
+                <strong>LANDMARK / SECTOR:</strong> {{ order.shipping_landmark }}
+            </div>
+            {% endif %}
+
+            <div style="font-size: 10.5px; font-weight: 900; color: #000000; margin-top: 3px; text-transform: uppercase;">
+                {{ order.shipping_city }} &bull; {{ order.shipping_province }} {% if order.shipping_postal_code %}({{ order.shipping_postal_code }}){% endif %} &bull; {{ order.shipping_country }}
+            </div>
+        </div>
+
+        <!-- Clean COD Collection Box -->
+        <div class="cod-box">
+            <div>
+                <div class="cod-label">[ COD ] CASH ON DELIVERY COLLECTION</div>
+                <div class="cod-warning">[ RIDER: COLLECT FULL CASH BEFORE HANDING OVER PARCEL ]</div>
+            </div>
+            <div>
+                <div class="cod-amount">
+                    Rs. {{ order.grand_total|floatformat:0 }} /-
+                </div>
+            </div>
+        </div>
+
+        <!-- Courier & Parcel Metadata -->
+        <div class="meta-grid">
+            <div class="meta-col">
+                <h5>CONSIGNMENT TRACKING AWB:</h5>
+                <p style="font-family: monospace; font-size: 11.5px;">{{ order.tracking_number|default:"Assigned upon pickup" }}</p>
+            </div>
+            <div class="meta-col">
+                <h5>WEIGHT & PIECES:</h5>
+                <p>{{ order.total_items_count }} Piece(s) &bull; ~1.5 KG (Home Textile)</p>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 55%;">PARCEL ITEMS DESCRIPTION</th>
+                    <th style="width: 25%;">SKU</th>
+                    <th style="width: 10%; text-align: center;">QTY</th>
+                    <th style="width: 10%; text-align: right;">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>
+                        <strong style="color: #000000;">{{ item.product_name }}</strong>
+                        <span style="font-size: 9.5px; color: #000000; display: block;">
+                            Size: <strong>{{ item.size_name|default:"Standard" }}</strong> &bull; Color: <strong>{{ item.color_name|default:"Standard" }}</strong>
+                        </span>
+                    </td>
+                    <td class="sku-col">{{ item.variant_sku }}</td>
+                    <td class="qty-col">{{ item.quantity }}</td>
+                    <td style="text-align: right; font-weight: 800;">Rs. {{ item.line_total|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Special Instructions -->
+        <div class="instructions-box">
+            <strong>SPECIAL INSTRUCTIONS:</strong> 
+            <span>
+                {{ order.customer_note|default:"Standard Home Textile. Please call customer on mobile before arrival. Handle with care." }}
+            </span>
+        </div>
+
+        <!-- Return Shipper Guarantee Footer -->
+        <div class="label-footer">
+            <span>Powered by Twiltex Faisalabad &bull; Quality Guaranteed</span>
+            <span>Return Helpline: {{ site_settings.phone }} &bull; {{ site_settings.email }}</span>
+        </div>
+
+    </div>
+
+    <!-- Cut guide lines between labels (JS controls visibility per mode) -->
+    {% if not forloop.last %}
+    <div class="cut-guide cut-guide-2" data-cut-after="{{ forloop.counter }}">
+        <span>✂ - - - - - - - - - - - - - - - CUT HERE - - - - - - - - - - - - - - - ✂</span>
+    </div>
+    <div class="cut-guide cut-guide-3" data-cut-after="{{ forloop.counter }}">
+        <span>✂ - - - - - - - - - - - - - - - CUT HERE - - - - - - - - - - - - - - - ✂</span>
+    </div>
+    {% endif %}
+
+    {% empty %}
+    <div style="max-width: 600px; margin: 40px auto; text-align: center; background: white; padding: 40px; border-radius: 6px; border: 1.5px solid #000000;">
+        <h3 style="margin-top: 0; color: #000000;">No Orders Selected</h3>
+        <p style="color: #000000;">Please select one or more orders from the Django Admin Orders list and choose "Print Selected Shipping Labels / Invoices (Bulk)".</p>
+        <a href="/admin/orders/order/" class="btn">Return to Orders Admin</a>
+    </div>
+    {% endfor %}
+
+    <script>
+        /**
+         * setLayoutMode(mode)
+         * Switches between 1, 2, or 3 labels per A4 page.
+         *
+         * For modes 2 and 3, instead of relying on CSS page-break-after on the label
+         * itself (which causes issues), we INJECT a zero-height <div class="page-pair-break">
+         * or <div class="page-trio-break"> AFTER every Nth pair/trio. This tells the
+         * browser's print engine to start a new page there — cleanly.
+         */
+        function setLayoutMode(mode) {
+            const body = document.body;
+
+            // 1. Swap body class
+            body.classList.remove('layout-1-per-page', 'layout-2-per-page', 'layout-3-per-page');
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+
+            // 2. Remove any previously injected page-break divs
+            document.querySelectorAll('.injected-page-break').forEach(el => el.remove());
+
+            // 3. Reset all cut-guide visibility
+            document.querySelectorAll('.cut-guide').forEach(el => el.style.display = 'none');
+
+            const labels = Array.from(document.querySelectorAll('.shipping-label-wrapper'));
+            const total = labels.length;
+
+            if (mode === '1') {
+                body.classList.add('layout-1-per-page');
+                const b = document.getElementById('btn-mode-1');
+                if (b) b.classList.add('active');
+                // Cut guides hidden for mode 1
+
+            } else if (mode === '3') {
+                body.classList.add('layout-3-per-page');
+                const b = document.getElementById('btn-mode-3');
+                if (b) b.classList.add('active');
+
+                // Show cut-guide-3 lines (but hide ones that fall exactly on a page boundary)
+                document.querySelectorAll('.cut-guide-3').forEach(el => {
+                    const afterIdx = parseInt(el.getAttribute('data-cut-after'), 10);
+                    if (afterIdx % 3 === 0) {
+                        el.style.display = 'none'; // page boundary — no cut needed here
+                    } else {
+                        el.style.display = 'block';
+                    }
+                });
+
+                // Inject page-break divs after every 3rd label (but not after the last)
+                labels.forEach(function(lw, i) {
+                    const idx1 = i + 1;
+                    if (idx1 % 3 === 0 && idx1 < total) {
+                        const pb = document.createElement('div');
+                        pb.className = 'injected-page-break page-trio-break';
+                        pb.style.cssText = 'height:0;overflow:hidden;';
+                        lw.after(pb);
+                    }
+                });
+
+            } else {
+                // Default: mode 2
+                body.classList.add('layout-2-per-page');
+                const b = document.getElementById('btn-mode-2');
+                if (b) b.classList.add('active');
+
+                // Show cut-guide-2 lines (but hide ones that fall exactly on a page boundary)
+                document.querySelectorAll('.cut-guide-2').forEach(el => {
+                    const afterIdx = parseInt(el.getAttribute('data-cut-after'), 10);
+                    if (afterIdx % 2 === 0) {
+                        el.style.display = 'none'; // page boundary — no cut needed here
+                    } else {
+                        el.style.display = 'block';
+                    }
+                });
+
+                // Inject page-break divs after every 2nd label (but not after the last)
+                labels.forEach(function(lw, i) {
+                    const idx1 = i + 1;
+                    if (idx1 % 2 === 0 && idx1 < total) {
+                        const pb = document.createElement('div');
+                        pb.className = 'injected-page-break page-pair-break';
+                        pb.style.cssText = 'height:0;overflow:hidden;';
+                        lw.after(pb);
+                    }
+                });
+            }
+
+            try { localStorage.setItem('label_layout_mode', mode); } catch(e) {}
+        }
+
+        // Initialize from URL param or saved preference (defaults to 2 per A4 sheet)
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramMode = urlParams.get('layout');
+            var savedMode = null;
+            try { savedMode = localStorage.getItem('label_layout_mode'); } catch(e) {}
+            const targetMode = paramMode || savedMode || '2';
+            setLayoutMode(targetMode);
+        })();
+    </script>
+</body>
+</html>

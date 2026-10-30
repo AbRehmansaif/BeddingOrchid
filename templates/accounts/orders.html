@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="border-b border-stone-200 pb-4 mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-navy">Order History</h1>
+            <p class="text-xs text-stone-500 mt-1">Review status and details for all your bedding purchases</p>
+        </div>
+        <a href="{% url 'accounts:profile' %}" class="text-xs font-semibold text-terracotta hover:underline">&larr; Back to Account</a>
+    </div>
+
+    {% if orders %}
+    <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
+        {% for order in orders %}
+        <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div>
+                <span class="font-bold text-navy text-sm sm:text-base">{{ order.order_number }}</span>
+                <span class="text-stone-400 ml-3">{{ order.placed_at|date:"d M Y, h:i A" }}</span>
+                <p class="text-stone-600 mt-1">
+                    {{ order.total_items_count }} items &bull; {{ order.shipping_full_name }} &bull; {{ order.shipping_city }}
+                </p>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div>
+                    <span class="font-bold text-navy text-sm block">Rs. {{ order.grand_total|floatformat:0 }}</span>
+                    <span class="text-[10px] text-stone-400">Cash on Delivery</span>
+                </div>
+                <span class="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-navy text-white">
+                    {{ order.get_status_display }}
+                </span>
+                <a href="{% url 'accounts:order_detail' order_number=order.order_number %}" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold px-4 py-2 rounded-xl transition">
+                    View Order &rarr;
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-stone-200">
+        <p class="text-stone-500 font-serif text-lg mb-2">No orders placed yet.</p>
+        <a href="/collections/bed-sheets/" class="inline-block bg-navy text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-terracotta transition mt-2">Start Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

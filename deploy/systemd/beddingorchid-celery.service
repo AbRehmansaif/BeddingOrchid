@@ -1,0 +1,32 @@
+[Unit]
+Description=BeddingOrchid Celery Worker Service
+After=network.target redis.service postgresql.service
+
+[Service]
+Type=forking
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/beddingorchid
+EnvironmentFile=/var/www/beddingorchid/.env
+ExecStart=/var/www/beddingorchid/.venv/bin/celery multi start worker1 \
+    -A config.celery:app \
+    --pidfile=/run/beddingorchid/celery-%n.pid \
+    --logfile=/var/log/beddingorchid/celery-%n.log \
+    --loglevel=INFO \
+    --concurrency=2
+
+ExecStop=/var/www/beddingorchid/.venv/bin/celery multi stopwait worker1 \
+    --pidfile=/run/beddingorchid/celery-%n.pid
+
+ExecReload=/var/www/beddingorchid/.venv/bin/celery multi restart worker1 \
+    -A config.celery:app \
+    --pidfile=/run/beddingorchid/celery-%n.pid \
+    --logfile=/var/log/beddingorchid/celery-%n.log \
+    --loglevel=INFO
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+

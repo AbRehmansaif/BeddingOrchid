@@ -1,0 +1,22 @@
+[Unit]
+Description=BeddingOrchid Celery Periodic Beat Scheduler Service
+After=network.target redis.service postgresql.service beddingorchid-celery.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/beddingorchid
+EnvironmentFile=/var/www/beddingorchid/.env
+ExecStart=/var/www/beddingorchid/.venv/bin/celery -A config.celery:app beat \
+    --pidfile=/run/beddingorchid/celerybeat.pid \
+    --logfile=/var/log/beddingorchid/celerybeat.log \
+    --loglevel=INFO \
+    --schedule=/var/www/beddingorchid/celerybeat-schedule
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.meta_title|default:category.name }} | {{ site_settings.store_name|default:'BeddingOrchid' }}{% endblock %}
+{% block meta_description %}{{ category.meta_description|default:category.description|truncatewords:25 }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs & Category Header -->
+<div class="bg-linen/60 border-b border-stone-200 py-6 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="text-xs text-stone-500 mb-3 flex items-center space-x-2">
+            <a href="{% url 'catalog:home' %}" class="hover:text-navy">Home</a>
+            <span>/</span>
+            <span class="text-navy font-semibold">{{ category.name }}</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-navy">{{ category.name }}</h1>
+        {% if category.description %}
+        <p class="text-sm text-stone-600 max-w-3xl mt-2 leading-relaxed">{{ category.description }}</p>
+        {% endif %}
+
+        <!-- Subcategory Filter Chips -->
+        {% if subcategories %}
+        <div class="flex flex-wrap gap-2 mt-4 sm:mt-6">
+            <a href="{{ category.get_absolute_url }}" class="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-navy text-white shadow-sm">
+                All {{ category.name }}
+            </a>
+            {% for sub in subcategories %}
+            <a href="{{ sub.get_absolute_url }}" class="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 transition shadow-sm">
+                {{ sub.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Products & Filter Layout -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+
+    <!-- Mobile Filter Toggle Button -->
+    <div class="lg:hidden flex items-center justify-between mb-4">
+        <span class="text-xs text-stone-500 font-medium">
+            Showing <strong>{{ products|length }}</strong> of <strong>{{ total_count }}</strong> products
+        </span>
+        <button type="button" onclick="toggleFilterDrawer()" class="flex items-center space-x-2 bg-white border border-stone-300 text-stone-700 text-xs font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:bg-stone-50 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+            </svg>
+            <span>Filter &amp; Sort</span>
+            {% if current_size or current_color or current_sort != 'featured' %}
+            <span class="bg-terracotta text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">!</span>
+            {% endif %}
+        </button>
+    </div>
+
+    <!-- Mobile Filter Drawer Overlay -->
+    <div id="filterDrawerOverlay" class="fixed inset-0 bg-stone-900/50 z-40 hidden lg:hidden" onclick="toggleFilterDrawer()"></div>
+
+    <!-- Mobile Filter Drawer -->
+    <div id="filterDrawer" class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-stone-200">
+            <h3 class="font-bold text-navy text-base">Filter &amp; Sort</h3>
+            <button type="button" onclick="toggleFilterDrawer()" class="p-2 text-stone-500 hover:text-navy">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form method="GET" class="p-5 space-y-6">
+            <!-- Sort Dropdown -->
+            <div>
+                <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-2">Sort By</label>
+                <select name="sort" onchange="this.form.submit()" class="w-full text-sm py-2.5 px-3 bg-stone-50 border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-navy">
+                    <option value="featured" {% if current_sort == 'featured' %}selected{% endif %}>Featured</option>
+                    <option value="best_sellers" {% if current_sort == 'best_sellers' %}selected{% endif %}>Best Sellers</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+                </select>
+            </div>
+
+            <!-- Size Filter -->
+            <div class="border-t border-stone-100 pt-5">
+                <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-3">Filter by Size</label>
+                <div class="space-y-2">
+                    <label class="flex items-center text-sm text-stone-600">
+                        <input type="radio" name="size" value="" {% if not current_size %}checked{% endif %} onchange="this.form.submit()" class="mr-2 text-navy" />
+                        All Sizes
+                    </label>
+                    {% for s in all_sizes %}
+                    <label class="flex items-center text-sm text-stone-600">
+                        <input type="radio" name="size" value="{{ s.id }}" {% if current_size == s.id|stringformat:'i' %}checked{% endif %} onchange="this.form.submit()" class="mr-2 text-navy" />
+                        {{ s.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Color Filter -->
+            <div class="border-t border-stone-100 pt-5">
+                <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-3">Filter by Color</label>
+                <div class="flex flex-wrap gap-2">
+                    {% for c in all_colors %}
+                    <label class="cursor-pointer" title="{{ c.name }}">
+                        <input type="radio" name="color" value="{{ c.id }}" {% if current_color == c.id|stringformat:'i' %}checked{% endif %} onchange="this.form.submit()" class="sr-only" />
+                        <div class="w-8 h-8 rounded-full border-2 {% if current_color == c.id|stringformat:'i' %}border-navy scale-110 shadow{% else %}border-stone-200{% endif %} flex items-center justify-center transition" style="background-color: {{ c.hex_code }};">
+                            {% if current_color == c.id|stringformat:'i' %}
+                            <span class="text-xs {% if c.hex_code == '#FAF8F5' or c.hex_code == '#FFFFFF' %}text-stone-900{% else %}text-white{% endif %}">✓</span>
+                            {% endif %}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Clear Filters -->
+            {% if current_size or current_color or current_sort != 'featured' %}
+            <div class="border-t border-stone-100 pt-4">
+                <a href="{{ category.get_absolute_url }}" class="block text-center text-sm text-terracotta hover:underline font-semibold py-2.5 bg-stone-50 rounded-lg">
+                    Reset All Filters
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        
+        <!-- Filters Sidebar (desktop only) -->
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-6 self-start sticky top-28">
+            <form method="GET" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+                
+                <!-- Sort Dropdown -->
+                <div>
+                    <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-2">Sort By</label>
+                    <select name="sort" onchange="this.form.submit()" class="w-full text-xs py-2.5 px-3 bg-stone-50 border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-navy">
+                        <option value="featured" {% if current_sort == 'featured' %}selected{% endif %}>Featured</option>
+                        <option value="best_sellers" {% if current_sort == 'best_sellers' %}selected{% endif %}>Best Sellers</option>
+                        <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+                    </select>
+                </div>
+
+                <!-- Size Filter -->
+                <div class="border-t border-stone-100 pt-5">
+                    <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-3">Filter by Size</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-xs text-stone-600">
+                            <input type="radio" name="size" value="" {% if not current_size %}checked{% endif %} onchange="this.form.submit()" class="mr-2 text-navy" />
+                            All Sizes
+                        </label>
+                        {% for s in all_sizes %}
+                        <label class="flex items-center text-xs text-stone-600">
+                            <input type="radio" name="size" value="{{ s.id }}" {% if current_size == s.id|stringformat:'i' %}checked{% endif %} onchange="this.form.submit()" class="mr-2 text-navy" />
+                            {{ s.name }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Color Filter -->
+                <div class="border-t border-stone-100 pt-5">
+                    <label class="block text-xs font-bold uppercase text-stone-700 tracking-wider mb-3">Filter by Color</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        {% for c in all_colors %}
+                        <label class="cursor-pointer" title="{{ c.name }}">
+                            <input type="radio" name="color" value="{{ c.id }}" {% if current_color == c.id|stringformat:'i' %}checked{% endif %} onchange="this.form.submit()" class="sr-only" />
+                            <div class="w-8 h-8 rounded-full border-2 {% if current_color == c.id|stringformat:'i' %}border-navy scale-110 shadow{% else %}border-stone-200{% endif %} flex items-center justify-center transition" style="background-color: {{ c.hex_code }};">
+                                {% if current_color == c.id|stringformat:'i' %}
+                                <span class="text-xs {% if c.hex_code == '#FAF8F5' or c.hex_code == '#FFFFFF' %}text-stone-900{% else %}text-white{% endif %}">✓</span>
+                                {% endif %}
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Clear Filters Button -->
+                {% if current_size or current_color or current_sort != 'featured' %}
+                <div class="border-t border-stone-100 pt-4">
+                    <a href="{{ category.get_absolute_url }}" class="block text-center text-xs text-terracotta hover:underline font-semibold">
+                        Reset Filters
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+        </aside>
+
+        <!-- Product Grid -->
+        <div class="flex-1">
+            <div class="hidden lg:flex items-center justify-between mb-6">
+                <span class="text-xs text-stone-500 font-medium">Showing <strong>{{ products|length }}</strong> of <strong>{{ total_count }}</strong> luxury products</span>
+            </div>
+
+            {% if products %}
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {% for product in products %}
+                {% include 'partials/_product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <div class="flex items-center justify-center space-x-2 mt-10 sm:mt-12">
+                {% if products.has_previous %}
+                <a href="?page={{ products.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_size %}&size={{ current_size }}{% endif %}{% if current_color %}&color={{ current_color }}{% endif %}" class="px-3 sm:px-4 py-2 text-xs font-semibold bg-white border border-stone-300 rounded-lg hover:bg-stone-50">
+                    &larr; Previous
+                </a>
+                {% endif %}
+
+                <span class="px-3 sm:px-4 py-2 text-xs font-bold text-navy bg-stone-100 rounded-lg">
+                    Page {{ products.number }} of {{ products.paginator.num_pages }}
+                </span>
+
+                {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_size %}&size={{ current_size }}{% endif %}{% if current_color %}&color={{ current_color }}{% endif %}" class="px-3 sm:px-4 py-2 text-xs font-semibold bg-white border border-stone-300 rounded-lg hover:bg-stone-50">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-16 sm:py-20 bg-white rounded-2xl border border-stone-200">
+                <p class="text-stone-500 font-serif text-lg mb-2">No bedding items found matching your filters.</p>
+                <a href="{{ category.get_absolute_url }}" class="inline-block bg-navy text-white text-xs font-bold px-5 py-2.5 rounded-lg hover:bg-terracotta transition mt-2">Clear All Filters</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFilterDrawer() {
+    const drawer = document.getElementById('filterDrawer');
+    const overlay = document.getElementById('filterDrawerOverlay');
+    const isOpen = !drawer.classList.contains('-translate-x-full');
+    
+    if (isOpen) {
+        drawer.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+    } else {
+        drawer.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+</script>
+{% endblock %}

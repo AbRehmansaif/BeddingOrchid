@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout &bull; Cash on Delivery | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div class="mb-6 sm:mb-8 border-b border-stone-200 pb-4">
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold text-navy">Secure Checkout</h1>
+        <p class="text-xs text-stone-500 mt-1">🔒 Safe &amp; Secure &bull; Cash on Delivery (COD) Nationwide</p>
+    </div>
+
+    <form action="{% url 'orders:checkout' %}" method="POST" id="checkoutForm" novalidate>
+        {% csrf_token %}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+            
+            <!-- Left: Shipping Address & Details (7 cols) -->
+            <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+                
+                <!-- Saved Addresses for Logged In Customer -->
+                {% if saved_addresses %}
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm">
+                    <h2 class="text-sm sm:text-base font-bold text-navy mb-4 flex items-center justify-between">
+                        <span>Select Saved Address</span>
+                        <a href="{% url 'accounts:addresses' %}" class="text-xs text-terracotta underline font-normal">Manage Addresses</a>
+                    </h2>
+                    <div class="space-y-3">
+                        {% for addr in saved_addresses %}
+                        <label class="block p-3 sm:p-4 rounded-xl border border-stone-200 cursor-pointer hover:border-navy transition has-[:checked]:border-navy has-[:checked]:bg-stone-50">
+                            <input type="radio" name="selected_saved_address" value="{{ addr.id }}"
+                                {% if addr.is_default %}checked{% endif %}
+                                onchange="fillSavedAddress('{{ addr.full_name|escapejs }}','{{ addr.phone|escapejs }}','{{ addr.address_line1|escapejs }}','{{ addr.address_line2|escapejs }}','{{ addr.city|escapejs }}','{{ addr.province|escapejs }}','{{ addr.landmark|escapejs }}')"
+                                class="mr-2 text-navy" />
+                            <strong class="text-stone-900 text-sm">{{ addr.full_name }} ({{ addr.label }})</strong>
+                            &bull; <span class="text-xs text-stone-600">{{ addr.phone }}</span>
+                            <p class="text-xs text-stone-500 mt-1 ml-5">{{ addr.address_line1 }}, {{ addr.city }}</p>
+                        </label>
+                        {% endfor %}
+                        <!-- Option to enter new address -->
+                        <label class="block p-3 sm:p-4 rounded-xl border border-stone-200 cursor-pointer hover:border-navy transition has-[:checked]:border-navy has-[:checked]:bg-stone-50">
+                            <input type="radio" name="selected_saved_address" value="new" onchange="clearAddressFields()" class="mr-2 text-navy" />
+                            <span class="text-stone-700 text-sm font-semibold">+ Use a different address</span>
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Customer Contact Details -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+                    <h2 class="text-sm sm:text-base font-bold text-navy border-b border-stone-100 pb-3">
+                        1. Your Contact Details
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Full Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="full_name" id="field_full_name"
+                                value="{{ default_address.full_name|default:user_full_name }}"
+                                placeholder="e.g. Ali Khan"
+                                required
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Mobile Number (COD) <span class="text-red-500">*</span></label>
+                            <input type="tel" name="phone" id="field_phone"
+                                value="{{ default_address.phone|default:user_phone }}"
+                                placeholder="03001234567"
+                                required
+                                pattern="[0-9]{10,13}"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                            <span class="text-[10px] text-stone-400 mt-0.5 block">Courier will call this number for delivery</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Email Address <span class="text-stone-400 font-normal">(optional)</span></label>
+                            <input type="email" name="email" id="field_email"
+                                value="{{ user_email }}"
+                                placeholder="you@example.com — for order receipt"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                        </div>
+                        {% if not user.is_authenticated %}
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Create Password <span class="text-stone-400 font-normal">(optional — min 6 chars)</span></label>
+                            <input type="password" name="password"
+                                placeholder="Set a password to track parcels online"
+                                minlength="6"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                            <span class="text-[10px] text-stone-400 mt-0.5 block">Only filled if you want to create an account</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Shipping Address Details -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+                    <h2 class="text-sm sm:text-base font-bold text-navy border-b border-stone-100 pb-3">
+                        2. Delivery Address
+                    </h2>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Complete Street Address <span class="text-red-500">*</span></label>
+                        <input type="text" name="address_line1" id="field_address_line1"
+                            value="{{ default_address.address_line1 }}"
+                            placeholder="House #, Street name, Block / Sector, Colony"
+                            required
+                            class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Destination City <span class="text-red-500">*</span></label>
+                            <select name="city" id="field_city" required
+                                onchange="handleCityChange(this.value, true)"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition">
+                                <option value="Other City" {% if default_city == 'Other City' or not default_city %}selected{% endif %}>Other Nationwide City</option>
+                                {% for city_name in pk_cities %}
+                                <option value="{{ city_name }}" {% if default_city == city_name %}selected{% endif %}>{{ city_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <!-- Other City text input (shown when Other City is selected) -->
+                            <input type="text" name="other_city" id="field_other_city"
+                                value="{{ default_other_city }}"
+                                placeholder="Type your city name (e.g. Kunri, Faisalabad, Karachi, etc.)"
+                                class="w-full px-4 py-2.5 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition mt-2 {% if default_city != 'Other City' and default_city %}hidden{% endif %}" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Province</label>
+                            <select name="province" id="field_province"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition">
+                                <option value="Punjab" {% if default_address.province == 'Punjab' or not default_address %}selected{% endif %}>Punjab</option>
+                                <option value="Sindh" {% if default_address.province == 'Sindh' %}selected{% endif %}>Sindh</option>
+                                <option value="Khyber Pakhtunkhwa" {% if default_address.province == 'Khyber Pakhtunkhwa' %}selected{% endif %}>Khyber Pakhtunkhwa (KPK)</option>
+                                <option value="Balochistan" {% if default_address.province == 'Balochistan' %}selected{% endif %}>Balochistan</option>
+                                <option value="Islamabad Capital" {% if default_address.province == 'Islamabad Capital' %}selected{% endif %}>Islamabad Capital Territory</option>
+                                <option value="Azad Kashmir" {% if default_address.province == 'Azad Kashmir' %}selected{% endif %}>Azad Kashmir</option>
+                                <option value="Gilgit-Baltistan" {% if default_address.province == 'Gilgit-Baltistan' %}selected{% endif %}>Gilgit-Baltistan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Apartment / Suite <span class="text-stone-400 font-normal">(optional)</span></label>
+                            <input type="text" name="address_line2" id="field_address_line2"
+                                value="{{ default_address.address_line2 }}"
+                                placeholder="Floor, Flat #, etc."
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Nearby Landmark <span class="text-stone-400 font-normal">(optional)</span></label>
+                            <input type="text" name="landmark" id="field_landmark"
+                                value="{{ default_address.landmark }}"
+                                placeholder="Near Mosque, School, Market"
+                                class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Special Delivery Instructions <span class="text-stone-400 font-normal">(optional)</span></label>
+                        <textarea name="customer_note" rows="2"
+                            placeholder="e.g. Please deliver after 2 PM or call before arriving"
+                            class="w-full px-4 py-3 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-navy transition"></textarea>
+                    </div>
+
+                    {% if user.is_authenticated and not saved_addresses %}
+                    <label class="flex items-center text-xs text-stone-700 mt-2">
+                        <input type="checkbox" name="save_address" checked class="h-4 w-4 text-navy rounded border-stone-300 mr-2" />
+                        Save this address to my account for faster future checkout
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Method (COD) -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+                    <h2 class="text-sm sm:text-base font-bold text-navy border-b border-stone-100 pb-3">
+                        3. Payment Method
+                    </h2>
+                    
+                    <div class="p-4 rounded-xl border-2 border-navy bg-cream/70 flex items-start space-x-3">
+                        <input type="radio" name="payment_method" value="COD" checked class="mt-1 text-navy flex-shrink-0" />
+                        <div>
+                            <span class="font-bold text-navy text-sm block">💵 Cash on Delivery (COD)</span>
+                            <p class="text-xs text-stone-600 mt-0.5 leading-relaxed">Pay in cash to the courier rider upon delivery at your doorstep. No advance bank transfer needed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary (5 cols) -->
+            <div class="lg:col-span-5">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-5 sticky top-28">
+                    <h2 class="text-base sm:text-lg font-serif font-bold text-navy border-b border-stone-100 pb-3">
+                        Order Summary ({{ items|length }} item{{ items|length|pluralize }})
+                    </h2>
+
+                    <!-- Items list -->
+                    <div class="divide-y divide-stone-100 max-h-64 overflow-y-auto pr-1 space-y-3">
+                        {% for item in items %}
+                        <div class="pt-3 first:pt-0 flex items-center justify-between space-x-3">
+                            <div class="flex items-center space-x-3 min-w-0">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200">
+                                    {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover" />
+                                    {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-[9px] text-stone-400">Bedding</div>
+                                    {% endif %}
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-semibold text-stone-900 line-clamp-2">{{ item.variant.product.name }}</h4>
+                                    <p class="text-[10px] text-stone-500 mt-0.5">{{ item.variant.size.name|default:"Standard" }} &bull; {{ item.variant.color.name|default:"Default" }} &bull; ×{{ item.quantity }}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-navy flex-shrink-0">Rs. {{ item.line_total|floatformat:0 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Financial Summary -->
+                    <div class="border-t border-stone-200 pt-4 space-y-2 text-xs text-stone-600">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span class="font-bold text-stone-900">Rs. {{ subtotal|floatformat:0 }}</span>
+                        </div>
+
+                        {% if discount > 0 %}
+                        <div class="flex justify-between text-emerald-700 font-semibold">
+                            <span>Coupon ({{ coupon.code }})</span>
+                            <span>-Rs. {{ discount|floatformat:0 }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex justify-between">
+                            <span>Delivery Fee</span>
+                            {% if shipping_fee == 0 %}
+                            <span class="text-emerald-700 font-bold">FREE</span>
+                            {% else %}
+                            <span class="font-bold text-stone-900">Rs. {{ shipping_fee|floatformat:0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex justify-between text-sm sm:text-base font-bold text-navy border-t border-stone-200 pt-3">
+                            <span>Total Payable (COD)</span>
+                            <span class="text-terracotta">Rs. {{ grand_total|floatformat:0 }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button type="submit" id="placeOrderBtn"
+                        class="w-full bg-terracotta hover:bg-opacity-95 text-white font-bold py-3.5 sm:py-4 px-6 rounded-xl shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm sm:text-base">
+                        <span>✅ Confirm &amp; Place Order (COD) &rarr;</span>
+                    </button>
+
+                    <p class="text-[11px] text-stone-500 text-center leading-relaxed">
+                        🔒 We will call you on your mobile to confirm delivery details before dispatching.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Preset known cities for dropdown matching
+const KNOWN_CITIES = {{ pk_cities|safe }};
+
+function handleCityChange(value, isUserAction) {
+    const otherInput = document.getElementById('field_other_city');
+    if (!otherInput) return;
+    if (value === 'Other City') {
+        otherInput.classList.remove('hidden');
+        if (isUserAction) {
+            otherInput.focus();
+        }
+    } else {
+        otherInput.classList.add('hidden');
+    }
+}
+
+function fillSavedAddress(name, phone, a1, a2, city, prov, landmark) {
+    document.getElementById('field_full_name').value = name;
+    document.getElementById('field_phone').value = phone;
+    document.getElementById('field_address_line1').value = a1;
+    document.getElementById('field_address_line2').value = a2;
+    document.getElementById('field_landmark').value = landmark;
+
+    // Province select
+    const provSel = document.getElementById('field_province');
+    for (let opt of provSel.options) {
+        if (opt.value === prov) { opt.selected = true; break; }
+    }
+
+    // City: match against known list or set Other City
+    const citySel = document.getElementById('field_city');
+    let cityMatched = false;
+    for (let opt of citySel.options) {
+        if (opt.value === city) {
+            opt.selected = true;
+            cityMatched = true;
+            break;
+        }
+    }
+    if (!cityMatched) {
+        // Set to "Other City" and populate text input
+        citySel.value = 'Other City';
+        document.getElementById('field_other_city').value = city;
+    }
+    handleCityChange(citySel.value);
+}
+
+function clearAddressFields() {
+    ['field_full_name', 'field_phone', 'field_address_line1', 'field_address_line2', 'field_landmark'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    document.getElementById('field_city').value = 'Other City';
+    handleCityChange('Other City');
+}
+
+// Prevent double-submit
+document.getElementById('checkoutForm').addEventListener('submit', function() {
+    const btn = document.getElementById('placeOrderBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Placing your order...';
+});
+
+// Init: show/hide other city input based on current selection
+document.addEventListener('DOMContentLoaded', function() {
+    const cityVal = document.getElementById('field_city').value;
+    handleCityChange(cityVal);
+});
+</script>
+{% endblock %}

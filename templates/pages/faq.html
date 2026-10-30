@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Frequently Asked Questions (FAQ) | {{ site_settings.store_name }}{% endblock %}
+
+{% block extra_head %}
+<!-- JSON-LD FAQPage Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does Cash on Delivery (COD) work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you order with Cash on Delivery, you don't need to pay anything online. Our courier partner will deliver your parcel directly to your address, and you pay cash to the courier rider upon receiving your package."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the standard delivery time across Pakistan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For major cities including Karachi, Lahore, Islamabad, and Rawalpindi, delivery usually takes 2 to 4 working days. For other nationwide cities, delivery takes 3 to 6 working days."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are your standard bedding sizes for mattresses in Pakistan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our King Size flat sheet measures 96x100 inches, Queen Size measures 90x100 inches, and Single Size measures 60x90 inches. Our fitted sheets feature generous 12 to 14 inch deep elastic pockets to fit pillow-top mattresses."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is your return and exchange policy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We offer a 7-day easy return and exchange guarantee. If you are not satisfied with the size or fabric feel, you can contact us on WhatsApp (+92 300 1234567) to request an exchange."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center max-w-xl mx-auto mb-10">
+        <h1 class="text-3xl sm:text-4xl font-serif font-bold text-navy">Frequently Asked Questions</h1>
+        <p class="text-xs text-stone-500 mt-2">Everything you need to know about our cotton bedding, sizes, delivery, and COD.</p>
+    </div>
+
+    <div class="space-y-4">
+        <details class="group bg-white p-6 rounded-2xl border border-stone-200 shadow-sm" open>
+            <summary class="flex justify-between items-center cursor-pointer font-bold text-navy text-sm sm:text-base list-none">
+                <span>How does Cash on Delivery (COD) work?</span>
+                <span class="transition group-open:rotate-180 text-terracotta">&darr;</span>
+            </summary>
+            <p class="text-stone-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                When you order with Cash on Delivery, you don't need to pay anything online. Our courier partner (TCS, Trax, Leopards, or PostEx) will deliver your parcel directly to your address, and you pay cash to the rider upon receiving your package.
+            </p>
+        </details>
+
+        <details class="group bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+            <summary class="flex justify-between items-center cursor-pointer font-bold text-navy text-sm sm:text-base list-none">
+                <span>What is the standard delivery time across Pakistan?</span>
+                <span class="transition group-open:rotate-180 text-terracotta">&darr;</span>
+            </summary>
+            <p class="text-stone-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                For major cities including Karachi, Lahore, Islamabad, and Rawalpindi, delivery usually takes <strong>2 to 4 working days</strong>. Other cities take 3 to 6 working days. You will receive SMS updates with your consignment tracking number.
+            </p>
+        </details>
+
+        <details class="group bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+            <summary class="flex justify-between items-center cursor-pointer font-bold text-navy text-sm sm:text-base list-none">
+                <span>Are your bed sheets 100% pure cotton?</span>
+                <span class="transition group-open:rotate-180 text-terracotta">&darr;</span>
+            </summary>
+            <p class="text-stone-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                Yes! All our bed sheets, duvet covers, and pillowcases are woven with 100% combed long-staple cotton with zero polyester blends. They are naturally breathable, hypoallergenic, and improve in softness with each wash.
+            </p>
+        </details>
+
+        <details class="group bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+            <summary class="flex justify-between items-center cursor-pointer font-bold text-navy text-sm sm:text-base list-none">
+                <span>What are your King and Queen bed sheet dimensions?</span>
+                <span class="transition group-open:rotate-180 text-terracotta">&darr;</span>
+            </summary>
+            <p class="text-stone-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                Our King Size flat sheet measures <strong>96 x 100 inches</strong> (244 x 254 cm), Queen Size measures <strong>90 x 100 inches</strong>, and Single Size measures <strong>60 x 90 inches</strong>. Pillowcases are standard 19 x 29 inches. Check our <a href="{% url 'pages:detail' slug='size-guide' %}" class="text-terracotta underline">Size Guide</a> for full details.
+            </p>
+        </details>
+
+        <details class="group bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+            <summary class="flex justify-between items-center cursor-pointer font-bold text-navy text-sm sm:text-base list-none">
+                <span>What is your return & exchange guarantee?</span>
+                <span class="transition group-open:rotate-180 text-terracotta">&darr;</span>
+            </summary>
+            <p class="text-stone-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                We offer a hassle-free <strong>7-day easy exchange</strong>. If you want a different color or size, message our WhatsApp support (+92 300 1234567) and our team will arrange an exchange parcel for you.
+            </p>
+        </details>
+    </div>
+</div>
+{% endblock %}

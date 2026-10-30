@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results for "{{ query }}" | {{ site_settings.store_name|default:'BeddingOrchid' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="border-b border-stone-200 pb-6 mb-8">
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold text-navy">
+            Search Results for &ldquo;{{ query }}&rdquo;
+        </h1>
+        <p class="text-xs text-stone-500 mt-1">Found {{ total_count }} matching bedding items.</p>
+    </div>
+
+    {% if products %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in products %}
+        {% include 'partials/_product_card.html' with product=product %}
+        {% endfor %}
+    </div>
+
+    {% if products.has_other_pages %}
+    <div class="flex items-center justify-center space-x-2 mt-12">
+        {% if products.has_previous %}
+        <a href="?q={{ query }}&page={{ products.previous_page_number }}" class="px-4 py-2 text-xs font-semibold bg-white border border-stone-300 rounded-lg hover:bg-stone-50">
+            &larr; Previous
+        </a>
+        {% endif %}
+        <span class="px-4 py-2 text-xs font-bold text-navy bg-stone-100 rounded-lg">
+            Page {{ products.number }} of {{ products.paginator.num_pages }}
+        </span>
+        {% if products.has_next %}
+        <a href="?q={{ query }}&page={{ products.next_page_number }}" class="px-4 py-2 text-xs font-semibold bg-white border border-stone-300 rounded-lg hover:bg-stone-50">
+            Next &rarr;
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-2xl border border-stone-200">
+        <p class="text-stone-500 font-serif text-lg mb-2">No bedding items found matching "{{ query }}".</p>
+        <p class="text-xs text-stone-400 mb-4">Try searching for "sateen", "percale", "comforter", "fitted", or "king".</p>
+        <a href="/collections/bed-sheets/" class="inline-block bg-navy text-white text-xs font-bold px-6 py-3 rounded-lg hover:bg-terracotta transition">Explore Bed Sheets</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

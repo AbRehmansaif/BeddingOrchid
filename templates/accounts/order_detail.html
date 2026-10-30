@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Order {{ order.order_number }} | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="border-b border-stone-200 pb-4 mb-8 flex justify-between items-center">
+        <div>
+            <span class="text-xs text-stone-400 uppercase tracking-wider">Order Details</span>
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-navy">{{ order.order_number }}</h1>
+            <p class="text-xs text-stone-500 mt-1">Placed on {{ order.placed_at|date:"d M Y, h:i A" }}</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'orders:admin_invoice' order_number=order.order_number %}" target="_blank" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-xl transition">
+                📄 Print Invoice
+            </a>
+            <a href="{% url 'accounts:orders' %}" class="bg-navy hover:bg-terracotta text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+                &larr; Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-stone-200 shadow-sm p-6 sm:p-8 space-y-8">
+        
+        <!-- Status Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-cream rounded-2xl border border-stone-200 gap-2">
+            <div>
+                <span class="text-xs text-stone-500">Current Status:</span>
+                <strong class="text-navy text-sm block sm:inline ml-0 sm:ml-2">{{ order.get_status_display }}</strong>
+            </div>
+            {% if order.tracking_number %}
+            <div>
+                <span class="text-xs text-stone-500">Tracking:</span>
+                <strong class="text-terracotta text-sm ml-1">{{ order.courier }}: {{ order.tracking_number }}</strong>
+                {% if order.tracking_url %}
+                <a href="{{ order.tracking_url }}" target="_blank" class="underline text-navy ml-2 text-xs">Track Parcel &rarr;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Shipping and Payment Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-stone-700">
+            <div class="bg-stone-50 p-5 rounded-2xl border border-stone-100">
+                <h3 class="font-bold text-navy uppercase tracking-wider mb-2">Shipping Details</h3>
+                <p class="font-bold text-stone-900">{{ order.shipping_full_name }}</p>
+                <p>{{ order.full_shipping_address }}</p>
+                <p class="mt-1">📞 {{ order.shipping_phone }}</p>
+            </div>
+            <div class="bg-stone-50 p-5 rounded-2xl border border-stone-100">
+                <h3 class="font-bold text-navy uppercase tracking-wider mb-2">Payment Details</h3>
+                <p class="font-bold text-stone-900">{{ order.get_payment_method_display }}</p>
+                <p class="text-stone-600">Payment Status: <strong class="text-navy uppercase">{{ order.get_payment_status_display }}</strong></p>
+                <p class="text-terracotta font-bold text-base mt-2">Total Amount: Rs. {{ order.grand_total|floatformat:0 }}</p>
+            </div>
+        </div>
+
+        <!-- Ordered Items -->
+        <div class="divide-y divide-stone-100">
+            <h3 class="font-serif font-bold text-navy text-base pb-3">Items in Order</h3>
+            {% for item in order.items.all %}
+            <div class="py-4 flex items-center justify-between text-xs">
+                <div>
+                    <h4 class="font-bold text-navy text-sm">{{ item.product_name }}</h4>
+                    <p class="text-stone-500 mt-0.5">Size: {{ item.size_name }} &bull; Color: {{ item.color_name }} &bull; SKU: {{ item.variant_sku }}</p>
+                    <span class="text-stone-400">Qty: {{ item.quantity }} &times; Rs. {{ item.unit_price|floatformat:0 }}</span>
+                </div>
+                <span class="font-bold text-navy text-sm">Rs. {{ item.line_total|floatformat:0 }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Totals breakdown -->
+        <div class="border-t border-stone-200 pt-4 max-w-xs ml-auto space-y-1.5 text-xs text-stone-600">
+            <div class="flex justify-between">
+                <span>Subtotal:</span>
+                <span class="font-bold text-stone-900">Rs. {{ order.subtotal|floatformat:0 }}</span>
+            </div>
+            {% if order.discount_total > 0 %}
+            <div class="flex justify-between text-emerald-700">
+                <span>Discount:</span>
+                <span>-Rs. {{ order.discount_total|floatformat:0 }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between">
+                <span>Delivery:</span>
+                <span>{% if order.shipping_fee == 0 %}FREE{% else %}Rs. {{ order.shipping_fee|floatformat:0 }}{% endif %}</span>
+            </div>
+            <div class="flex justify-between text-base font-bold text-navy border-t border-stone-200 pt-2">
+                <span>Total COD:</span>
+                <span>Rs. {{ order.grand_total|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

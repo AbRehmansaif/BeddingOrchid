@@ -1,0 +1,20 @@
+<div class="fin-kpi-card">
+  <div class="fin-kpi-label">
+    {{ label }}
+    {% if tooltip %}
+    <span class="fin-tooltip">
+      <i class="tip-icon">i</i>
+      <span class="tip-content">{{ tooltip }}</span>
+    </span>
+    {% endif %}
+  </div>
+  <div class="fin-kpi-value {% if negative %}{% if value <= 0 %}positive{% else %}negative{% endif %}{% else %}{% if value >= 0 %}positive{% else %}negative{% endif %}{% endif %}">
+    {% if prefix %}{{ prefix }} {% endif %}{{ value|floatformat:0 }}
+    {% if suffix %} <span style="font-size:14px;font-weight:600;">{{ suffix }}{% if suffix_label %}{{ suffix_label }}{% endif %}</span>{% endif %}
+  </div>
+  {% if change is not None %}
+  <div class="fin-kpi-change {% if change >= 0 %}up{% else %}down{% endif %}">
+    {% if change >= 0 %}▲{% else %}▼{% endif %} {{ change|floatformat:1 }}% vs prev period
+  </div>
+  {% endif %}
+</div>

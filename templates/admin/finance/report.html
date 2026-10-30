@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Financial Report — {{ date_from }} to {{ date_to }}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1E293B;
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none !important; }
+    }
+    .header {
+      border-bottom: 2px solid #0F172A;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .title { font-size: 24px; font-weight: 800; }
+    .subtitle { color: #64748B; font-size: 12px; margin-top: 4px; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .kpi-label { font-size: 11px; color: #64748B; text-transform: uppercase; font-weight: 600; }
+    .kpi-val { font-size: 18px; font-weight: 800; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 12px; }
+    th { background: #0F172A; color: white; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; }
+    td { padding: 8px 10px; border-bottom: 1px solid #E2E8F0; }
+    tr.total-row { font-weight: 800; background: #F1F5F9; border-top: 2px solid #0F172A; border-bottom: 2px solid #0F172A; }
+    .text-right { text-align: right; }
+    .btn {
+      background: #0F172A; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+    <button onclick="window.print()" class="btn">🖨️ Print / Save as PDF</button>
+    <a href="javascript:history.back()" class="btn" style="background: #64748B;">← Back to Dashboard</a>
+  </div>
+
+  <div class="header">
+    <div>
+      <div class="title">E-Commerce Store — Executive Financial Statement</div>
+      <div class="subtitle">Reporting Period: {{ date_from }} to {{ date_to }} | Generated on {% now "F j, Y, H:i" %}</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-weight: 700; font-size: 14px;">Currency: PKR</div>
+      <div style="font-size: 11px; color: #64748B;">Basis: Order Delivery Date</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Net Revenue</div>
+      <div class="kpi-val">Rs. {{ summary.net_revenue:,.2f }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Gross Profit</div>
+      <div class="kpi-val">Rs. {{ summary.gross_profit:,.2f }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">True Net Profit</div>
+      <div class="kpi-val" style="color: {% if summary.net_profit >= 0 %}#10B981{% else %}#EF4444{% endif %};">
+        Rs. {{ summary.net_profit:,.2f }}
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Net Margin %</div>
+      <div class="kpi-val">{{ summary.net_margin_pct }}%</div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #0F172A; padding-bottom: 4px; margin-bottom: 12px;">
+    Profit &amp; Loss Statement
+  </h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Line Item</th>
+        <th class="text-right">Amount (PKR)</th>
+        <th class="text-right">% of Net Revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Gross Sales (Delivered Orders)</td>
+        <td class="text-right">Rs. {{ summary.gross_sales:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px; color: #64748B;">- Discounts</td>
+        <td class="text-right">-Rs. {{ summary.discount_total:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px; color: #64748B;">- Customer Refunds</td>
+        <td class="text-right">-Rs. {{ summary.refund_total:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px; color: #64748B;">+ Shipping &amp; COD Fees Collected</td>
+        <td class="text-right">+Rs. {{ summary.shipping_income:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr class="total-row">
+        <td>NET REVENUE</td>
+        <td class="text-right">Rs. {{ summary.net_revenue:,.2f }}</td>
+        <td class="text-right">100.0%</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Cost of Goods Sold (COGS)</td>
+        <td class="text-right">-Rs. {{ summary.product_cost:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.product_cost summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Packaging Materials</td>
+        <td class="text-right">-Rs. {{ summary.packaging_cost:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.packaging_cost summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr class="total-row">
+        <td>GROSS PROFIT</td>
+        <td class="text-right">Rs. {{ summary.gross_profit:,.2f }}</td>
+        <td class="text-right">{{ summary.gross_margin_pct }}%</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Courier Forward Freight</td>
+        <td class="text-right">-Rs. {{ summary.courier_forward:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Courier COD Commission</td>
+        <td class="text-right">-Rs. {{ summary.courier_cod_fee:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Courier Return / RTO Fees</td>
+        <td class="text-right">-Rs. {{ summary.courier_return:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Damaged &amp; Lost Return Write-offs</td>
+        <td class="text-right">-Rs. {{ summary.return_loss:,.2f }}</td>
+        <td class="text-right">-</td>
+      </tr>
+      <tr class="total-row">
+        <td>CONTRIBUTION PROFIT (BEFORE ADS)</td>
+        <td class="text-right">Rs. {{ summary.contribution_profit_before_ads:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.contribution_profit_before_ads summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Advertising Spend (Meta / Google / TikTok)</td>
+        <td class="text-right">-Rs. {{ summary.ad_spend:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.ad_spend summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr class="total-row">
+        <td>CONTRIBUTION PROFIT (AFTER ADS)</td>
+        <td class="text-right">Rs. {{ summary.contribution_profit:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.contribution_profit summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr>
+        <td style="padding-left: 20px;">- Operating Expenses (Salaries, Rent, Utilities, Software)</td>
+        <td class="text-right">-Rs. {{ summary.operating_expenses:,.2f }}</td>
+        <td class="text-right">{% widthratio summary.operating_expenses summary.net_revenue 100 %}%</td>
+      </tr>
+      <tr class="total-row" style="background: #E2E8F0; font-size: 13px;">
+        <td>TRUE NET PROFIT</td>
+        <td class="text-right" style="color: {% if summary.net_profit >= 0 %}#10B981{% else %}#EF4444{% endif %}; font-size: 15px;">
+          Rs. {{ summary.net_profit:,.2f }}
+        </td>
+        <td class="text-right">{{ summary.net_margin_pct }}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="font-size: 11px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 8px; margin-top: 32px;">
+    Confidential Internal Report • Store Admin Finance System
+  </div>
+</body>
+</html>

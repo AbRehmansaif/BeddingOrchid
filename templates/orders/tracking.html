@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Your Order | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center max-w-xl mx-auto mb-10">
+        <h1 class="text-3xl font-serif font-bold text-navy">Track Your Bedding Parcel</h1>
+        <p class="text-xs text-stone-500 mt-2">Enter your Order Reference Number (e.g. LC-2026-000101) and Mobile Number to check real-time status.</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-sm mb-10">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-5">
+                <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Order Number</label>
+                <input type="text" name="order_number" value="{{ request.GET.order_number }}" placeholder="e.g. LC-2026-000101" required class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none uppercase font-semibold" />
+            </div>
+            <div class="sm:col-span-5">
+                <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Mobile Phone (Last 7 digits)</label>
+                <input type="text" name="phone" value="{{ request.GET.phone }}" placeholder="e.g. 03001234567" class="w-full text-xs p-3 bg-stone-50 border border-stone-300 rounded-xl focus:outline-none" />
+            </div>
+            <div class="sm:col-span-2 flex items-end">
+                <button type="submit" class="w-full bg-navy hover:bg-terracotta text-white font-bold py-3 px-4 rounded-xl text-xs transition">
+                    Track
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if error_msg %}
+    <div class="p-4 bg-red-50 text-red-700 border border-red-200 rounded-2xl text-xs text-center mb-8">
+        {{ error_msg }}
+    </div>
+    {% endif %}
+
+    {% if order %}
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-md space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-100 pb-4">
+            <div>
+                <span class="text-xs text-stone-400 uppercase tracking-wider">Tracking Order</span>
+                <h2 class="text-xl font-serif font-bold text-navy">{{ order.order_number }}</h2>
+                <span class="text-xs text-stone-500">Placed on {{ order.placed_at|date:"d M Y, h:i A" }}</span>
+            </div>
+            <div class="mt-2 sm:mt-0">
+                <span class="inline-block bg-navy text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Visual Status Timeline -->
+        <div class="py-4">
+            <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                <!-- Step 1: Confirmed -->
+                <div class="flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white mb-2 {% if order.status != 'cancelled' %}bg-navy{% else %}bg-stone-300{% endif %}">
+                        ✓
+                    </div>
+                    <span class="font-bold text-stone-800">Order Placed</span>
+                </div>
+
+                <!-- Step 2: Processing / Packed -->
+                <div class="flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white mb-2 {% if order.status in 'processing,packed,dispatched,delivered' %}bg-navy{% else %}bg-stone-300{% endif %}">
+                        2
+                    </div>
+                    <span class="font-bold text-stone-800">Packed</span>
+                </div>
+
+                <!-- Step 3: Dispatched -->
+                <div class="flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white mb-2 {% if order.status in 'dispatched,delivered' %}bg-navy{% else %}bg-stone-300{% endif %}">
+                        3
+                    </div>
+                    <span class="font-bold text-stone-800">Out for Delivery</span>
+                </div>
+
+                <!-- Step 4: Delivered -->
+                <div class="flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white mb-2 {% if order.status == 'delivered' %}bg-emerald-600{% else %}bg-stone-300{% endif %}">
+                        4
+                    </div>
+                    <span class="font-bold text-stone-800">Delivered</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin / Store Updates Note (if provided) -->
+        {% if order.admin_note %}
+        <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-5 text-xs text-amber-950 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-amber-900 font-bold">
+                    <span class="w-6 h-6 rounded-lg bg-amber-200/70 flex items-center justify-center text-amber-800 shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    <span class="text-sm">Store Note / Order Update:</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full border border-amber-200/60">Update</span>
+            </div>
+            <div class="bg-white/90 border border-amber-200/50 rounded-xl p-3.5 text-stone-700 leading-relaxed whitespace-pre-line text-xs font-medium">
+                {{ order.admin_note }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Courier Details if dispatched -->
+        {% if order.tracking_number %}
+        <div class="bg-linen p-5 rounded-2xl border border-stone-200 text-xs space-y-2">
+            <h4 class="font-bold text-navy text-sm">🚚 Courier Tracking Details:</h4>
+            <p>Courier Service: <strong>{{ order.courier|default:"Trax Express" }}</strong></p>
+            <p>Tracking Consignment Number: <strong class="text-terracotta text-sm">{{ order.tracking_number }}</strong></p>
+            {% if order.tracking_url %}
+            <a href="{{ order.tracking_url }}" target="_blank" rel="noopener" class="inline-block bg-navy hover:bg-terracotta text-white font-bold py-2 px-4 rounded-lg mt-2 transition">
+                Open Courier Live Tracking &rarr;
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Order Items Breakdown -->
+        {% if order.items.all %}
+        <div class="pt-4 border-t border-stone-100">
+            <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">Items in this Order ({{ order.total_items_count }})</h4>
+            <div class="divide-y divide-stone-100">
+                {% for item in order.items.all %}
+                <div class="flex items-center justify-between text-xs py-2.5">
+                    <div class="flex items-center space-x-3">
+                        {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="w-12 h-12 object-cover rounded-lg border border-stone-200 shrink-0">
+                        {% else %}
+                        <div class="w-12 h-12 bg-stone-100 rounded-lg border border-stone-200 flex items-center justify-center text-stone-400 shrink-0">
+                            📦
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="font-bold text-navy text-xs sm:text-sm">{{ item.product_name }}</div>
+                            <div class="text-stone-400 text-[11px] mt-0.5">
+                                {% if item.size_name %}{{ item.size_name }}{% endif %}
+                                {% if item.color_name %}{% if item.size_name %} &bull; {% endif %}{{ item.color_name }}{% endif %}
+                                <span class="text-stone-500 font-semibold">&times; {{ item.quantity }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="font-bold text-stone-900 text-xs sm:text-sm text-right">
+                        Rs. {{ item.line_total|floatformat:0 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Address & Totals -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-stone-100 text-xs">
+            <div>
+                <span class="text-stone-400 block mb-1">Destination Address:</span>
+                <strong class="text-stone-900 block">{{ order.shipping_full_name }}</strong>
+                <p class="text-stone-600">{{ order.full_shipping_address }}</p>
+            </div>
+            <div>
+                <span class="text-stone-400 block mb-1">Payment & Totals:</span>
+                <strong class="text-stone-900 block">{{ order.get_payment_method_display }}</strong>
+                <p class="text-stone-600">Total Payable: <strong class="text-navy text-sm">Rs. {{ order.grand_total|floatformat:0 }}</strong></p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

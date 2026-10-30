@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Bag | {{ site_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+    <h1 class="text-2xl sm:text-3xl font-serif font-bold text-navy mb-6 sm:mb-8">Shopping Bag</h1>
+
+    {% if items %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+        
+        <!-- Cart Table (8 cols) -->
+        <div class="lg:col-span-8 space-y-4 sm:space-y-6">
+            
+            <!-- Free Shipping Progress -->
+            <div class="bg-cream p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-200">
+                {% if free_shipping.achieved %}
+                <div class="text-sm font-bold text-emerald-800">
+                    🎉 You have qualified for <strong>FREE Nationwide Delivery</strong>!
+                </div>
+                <div class="w-full bg-stone-200 rounded-full h-2 mt-2">
+                    <div class="bg-emerald-600 h-2 rounded-full w-full"></div>
+                </div>
+                {% else %}
+                <div class="text-xs sm:text-sm text-stone-700">
+                    Add <strong class="text-terracotta">Rs. {{ free_shipping.remaining|floatformat:0 }}</strong> more to unlock <strong>FREE Delivery</strong>!
+                </div>
+                <div class="w-full bg-stone-200 rounded-full h-2 mt-2">
+                    <div class="bg-terracotta h-2 rounded-full transition-all duration-300" style="width: {{ free_shipping.progress }}%;"></div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Table of items -->
+            <div class="bg-white rounded-xl sm:rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="divide-y divide-stone-100">
+                    {% for item in items %}
+                    <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                        <div class="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200">
+                                {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover" />
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-xs text-stone-400">Bedding</div>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-serif font-bold text-navy text-sm sm:text-base hover:text-terracotta transition">
+                                    <a href="{{ item.variant.product.get_absolute_url }}">{{ item.variant.product.name }}</a>
+                                </h3>
+                                <p class="text-xs text-stone-500 mt-1">
+                                    Size: <strong>{{ item.variant.size.name|default:"Standard" }}</strong> &bull; Color: <strong>{{ item.variant.color.name|default:"Default" }}</strong>
+                                </p>
+                                <span class="text-xs text-stone-600 sm:hidden block mt-1">Rs. {{ item.unit_price|floatformat:0 }} each</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between w-full sm:w-auto sm:space-x-6">
+                            <!-- Quantity -->
+                            <form action="{% url 'cart:update' %}" method="POST" class="flex items-center border border-stone-300 rounded-lg overflow-hidden bg-stone-50">
+                                {% csrf_token %}
+                                <input type="hidden" name="variant_id" value="{{ item.variant.id }}" />
+                                <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" class="px-2.5 sm:px-3 py-1.5 text-stone-600 hover:bg-stone-200">&minus;</button>
+                                <span class="px-2.5 sm:px-3 py-1.5 text-xs font-bold text-navy">{{ item.quantity }}</span>
+                                <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" class="px-2.5 sm:px-3 py-1.5 text-stone-600 hover:bg-stone-200">&plus;</button>
+                            </form>
+
+                            <!-- Line total -->
+                            <div class="text-right">
+                                <span class="font-bold text-navy text-sm sm:text-base block">Rs. {{ item.line_total|floatformat:0 }}</span>
+                                {% if item.saving > 0 %}
+                                <span class="text-[10px] text-emerald-700 font-semibold">Saved Rs. {{ item.saving|floatformat:0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Remove Button -->
+                            <form action="{% url 'cart:remove' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="variant_id" value="{{ item.variant.id }}" />
+                                <button type="submit" class="text-stone-400 hover:text-red-600 p-1.5 sm:p-2" title="Remove item">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coupon Form -->
+            <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-xs">
+                    <span class="font-bold text-navy block">Have a promo code?</span>
+                    <span class="text-stone-500">Try code <strong class="text-terracotta">WELCOME10</strong> or <strong class="text-terracotta">BEDCRAFT500</strong></span>
+                </div>
+                {% if coupon %}
+                <div class="flex items-center space-x-3 bg-emerald-50 text-emerald-800 text-xs font-bold px-4 py-2.5 rounded-lg border border-emerald-200">
+                    <span>Applied: {{ coupon.code }}</span>
+                    <form action="{% url 'cart:remove_coupon' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="text-red-600 hover:underline">Remove</button>
+                    </form>
+                </div>
+                {% else %}
+                <form action="{% url 'cart:apply_coupon' %}" method="POST" class="flex w-full sm:w-auto">
+                    {% csrf_token %}
+                    <input type="text" name="coupon_code" placeholder="Enter coupon code" required class="px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-l-lg focus:outline-none uppercase" />
+                    <button type="submit" class="bg-navy hover:bg-opacity-95 text-white px-4 py-2 text-xs font-bold rounded-r-lg transition">Apply</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Order Summary Box (4 cols) -->
+        <div class="lg:col-span-4">
+            <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4 sticky top-28">
+                <h2 class="text-lg font-serif font-bold text-navy border-b border-stone-100 pb-3">Order Summary</h2>
+
+                <div class="flex justify-between text-sm text-stone-600">
+                    <span>Subtotal</span>
+                    <span class="font-bold text-stone-900">Rs. {{ subtotal|floatformat:0 }}</span>
+                </div>
+
+                {% if discount > 0 %}
+                <div class="flex justify-between text-sm text-emerald-700 font-semibold">
+                    <span>Discount ({{ coupon.code }})</span>
+                    <span>-Rs. {{ discount|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+
+                <div class="flex justify-between text-sm text-stone-600">
+                    <span>Shipping Fee</span>
+                    {% if shipping_fee == 0 %}
+                    <span class="text-emerald-700 font-bold uppercase text-xs">FREE</span>
+                    {% else %}
+                    <span class="font-bold text-stone-900">Rs. {{ shipping_fee|floatformat:0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-between text-lg font-bold text-navy border-t border-stone-200 pt-4">
+                    <span>Grand Total</span>
+                    <span>Rs. {{ grand_total|floatformat:0 }}</span>
+                </div>
+
+                <div class="p-3 bg-cream rounded-xl text-xs text-stone-600 flex items-center space-x-2">
+                    <span class="text-xl">💵</span>
+                    <span><strong>Cash on Delivery (COD)</strong> available. Pay cash to rider upon doorstep delivery.</span>
+                </div>
+
+                <a href="{% url 'orders:checkout' %}" class="block text-center w-full bg-terracotta hover:bg-opacity-90 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition">
+                    Proceed to Checkout &rarr;
+                </a>
+                <a href="{% url 'catalog:home' %}" class="block text-center text-xs text-stone-500 hover:text-navy underline">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-24 bg-white rounded-3xl border border-stone-200">
+        <svg class="w-16 h-16 mx-auto text-stone-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        <h2 class="text-2xl font-serif font-bold text-navy mb-2">Your Shopping Bag is Empty</h2>
+        <p class="text-stone-500 text-sm mb-6">Discover Pakistan's finest combed cotton bed sheets and duvets.</p>
+        <a href="/collections/bed-sheets/" class="inline-block bg-terracotta text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:bg-opacity-95 transition">
+            Explore Bedding Collection &rarr;
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Import Advertising Spend{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 24px auto; font-family: 'Inter', system-ui, sans-serif;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 24px; font-weight: 800; color: #1E293B; margin: 0;">📈 Import Ad Spend CSV</h1>
+      <p style="color: #64748B; font-size: 13px; margin: 4px 0 0 0;">Upload campaign spend export CSV from Meta Ads Manager, Google Ads, or TikTok Ads.</p>
+    </div>
+    <a href="{% url 'admin:finance_dashboard' %}" class="button" style="background: #1E293B; color: #fff;">← Finance Dashboard</a>
+  </div>
+
+  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Platform</label>
+          <select name="platform" style="width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px;" required>
+            <option value="meta">Meta Ads (Facebook / Instagram)</option>
+            <option value="google">Google Ads</option>
+            <option value="tiktok">TikTok Ads</option>
+            <option value="snapchat">Snapchat Ads</option>
+            <option value="other">Other Platform</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Currency in File</label>
+          <select name="currency" style="width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px;" required>
+            <option value="USD">USD ($)</option>
+            <option value="PKR">PKR (Rs.)</option>
+            <option value="AED">AED (AED)</option>
+            <option value="GBP">GBP (£)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Export CSV</label>
+          <input type="file" name="csv_file" accept=".csv" style="width: 100%; padding: 8px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px;" required>
+        </div>
+      </div>
+
+      <button type="submit" style="background: #6366F1; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;">
+        🚀 Import &amp; Rebuild Summaries
+      </button>
+    </form>
+  </div>
+
+  {% if result %}
+  <div style="background: #0F172A; border-radius: 12px; padding: 24px; color: #E2E8F0;">
+    <h2 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 16px 0;">📊 Ad Spend Import Summary</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+      <div style="background: #1E293B; padding: 12px; border-radius: 6px;">
+        <div style="font-size: 11px; color: #94A3B8; text-transform: uppercase;">Total Rows</div>
+        <div style="font-size: 20px; font-weight: 700; color: #fff;">{{ result.total_rows }}</div>
+      </div>
+      <div style="background: #1E293B; padding: 12px; border-radius: 6px;">
+        <div style="font-size: 11px; color: #94A3B8; text-transform: uppercase;">Created Entries</div>
+        <div style="font-size: 20px; font-weight: 700; color: #10B981;">{{ result.created }}</div>
+      </div>
+      <div style="background: #1E293B; padding: 12px; border-radius: 6px;">
+        <div style="font-size: 11px; color: #94A3B8; text-transform: uppercase;">Updated Entries</div>
+        <div style="font-size: 20px; font-weight: 700; color: #38BDF8;">{{ result.updated }}</div>
+      </div>
+      <div style="background: #1E293B; padding: 12px; border-radius: 6px;">
+        <div style="font-size: 11px; color: #94A3B8; text-transform: uppercase;">Total Spend (Base)</div>
+        <div style="font-size: 20px; font-weight: 700; color: #F87171;">Rs. {{ result.total_spend_base:,.2f }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Thank You For Your Order! | {{ site_settings.store_name }}{% endblock %}
+
+{% block extra_head %}
+<!-- Meta Pixel Purchase Event -->
+{% if site_settings.meta_pixel_id %}
+<script>
+  if (typeof fbq === 'function') {
+    fbq('track', 'Purchase', {
+      value: {{ order.grand_total }},
+      currency: 'PKR',
+      content_type: 'product',
+      contents: [
+        {% for item in order.items.all %}
+        {
+          id: '{{ item.variant_sku|default:item.product_id }}',
+          quantity: {{ item.quantity }},
+          item_price: {{ item.unit_price }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      order_id: '{{ order.order_number }}'
+    }, {
+      eventID: '{{ order.order_number }}'
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-white rounded-3xl p-8 sm:p-12 border border-stone-200 shadow-xl text-center space-y-6">
+        
+        <!-- Success Icon -->
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner">
+            ✓
+        </div>
+
+        <div>
+            <span class="text-xs font-bold text-terracotta tracking-widest uppercase">Order Confirmed</span>
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold text-navy mt-1">Thank You, {{ order.customer_name }}!</h1>
+            <p class="text-sm text-stone-600 mt-2">Your bedding order has been placed successfully via <strong>Cash on Delivery</strong>.</p>
+        </div>
+
+        <!-- Order Number Pill -->
+        <div class="bg-cream py-3 px-6 rounded-2xl border border-stone-200 inline-block">
+            <span class="text-xs text-stone-500 uppercase font-semibold">Order Reference Number:</span>
+            <span class="text-lg font-bold text-navy ml-2">{{ order.order_number }}</span>
+        </div>
+
+        <!-- Delivery Snapshot -->
+        <div class="text-left bg-stone-50 p-6 rounded-2xl border border-stone-200 space-y-3 text-xs text-stone-700">
+            <h3 class="font-bold text-navy uppercase tracking-wider text-xs border-b border-stone-200 pb-2">Delivery & Payment Details</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <span class="text-stone-400 block">Deliver To:</span>
+                    <strong class="text-stone-900">{{ order.shipping_full_name }}</strong>
+                    <p>{{ order.full_shipping_address }}</p>
+                    <p class="mt-1">📞 {{ order.shipping_phone }}</p>
+                </div>
+                <div>
+                    <span class="text-stone-400 block">Payment Method:</span>
+                    <strong class="text-stone-900">{{ order.get_payment_method_display }}</strong>
+                    <p class="text-emerald-700 font-semibold mt-1">Status: Cash to collect upon delivery</p>
+                    <p class="text-base font-bold text-navy mt-2">Amount: Rs. {{ order.grand_total|floatformat:0 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ordered Items Summary -->
+        <div class="text-left bg-white p-6 rounded-2xl border border-stone-200 divide-y divide-stone-100 space-y-3">
+            <h3 class="font-bold text-navy uppercase tracking-wider text-xs pb-1">Items In This Parcel:</h3>
+            {% for item in order.items.all %}
+            <div class="pt-3 first:pt-0 flex justify-between items-center text-xs">
+                <div>
+                    <span class="font-bold text-stone-900">{{ item.quantity }}x {{ item.product_name }}</span>
+                    <p class="text-stone-500 text-[11px]">{{ item.size_name }} &bull; {{ item.color_name }}</p>
+                </div>
+                <span class="font-bold text-navy">Rs. {{ item.line_total|floatformat:0 }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- What Happens Next Guide -->
+        <div class="bg-linen/50 p-6 rounded-2xl border border-stone-200 text-left text-xs text-stone-700 space-y-2">
+            <h4 class="font-bold text-navy text-sm">📦 What Happens Next?</h4>
+            <ol class="list-decimal pl-5 space-y-1 text-stone-600">
+                <li>Our team will call or WhatsApp you on <strong>{{ order.shipping_phone }}</strong> to verify delivery details.</li>
+                <li>Your bedding items will be inspected and carefully packed in protective packaging.</li>
+                <li>You will receive a tracking link via SMS once handed over to the courier (TCS/Trax/Leopards).</li>
+                <li>Please keep <strong>Rs. {{ order.grand_total|floatformat:0 }} cash ready</strong> for the rider.</li>
+            </ol>
+        </div>
+
+        <!-- Action Links -->
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+            <a href="{% url 'orders:track_order' %}?order_number={{ order.order_number }}" class="bg-navy hover:bg-opacity-95 text-white text-xs font-bold py-3.5 px-6 rounded-xl transition">
+                Track Order Status &rarr;
+            </a>
+            <a href="{% url 'catalog:home' %}" class="bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold py-3.5 px-6 rounded-xl border border-stone-300 transition">
+                Return to Storefront
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

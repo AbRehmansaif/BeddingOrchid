@@ -1,0 +1,951 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Finance Dashboard{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  /* ============================
+     Finance Dashboard – Premium Dark Theme
+     ============================ */
+  :root {
+    --finance-bg: #0F172A;
+    --finance-surface: #1E293B;
+    --finance-surface-2: #263348;
+    --finance-border: #334155;
+    --finance-text: #E2E8F0;
+    --finance-muted: #94A3B8;
+    --finance-accent: #6366F1;
+    --finance-green: #10B981;
+    --finance-red: #EF4444;
+    --finance-amber: #F59E0B;
+    --finance-blue: #3B82F6;
+    --finance-purple: #8B5CF6;
+  }
+
+  body.change-list #content,
+  #finance-dashboard {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--finance-bg);
+    color: var(--finance-text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .fin-page {
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ---- Top Bar ---- */
+  .fin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--finance-border);
+  }
+
+  .fin-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .fin-preset-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .fin-preset-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--finance-border);
+    background: var(--finance-surface);
+    color: var(--finance-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .fin-preset-btn:hover,
+  .fin-preset-btn.active {
+    background: var(--finance-accent);
+    border-color: var(--finance-accent);
+    color: #fff;
+  }
+
+  .fin-nav-links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .fin-nav-links a {
+    color: var(--finance-muted);
+    font-size: 12px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid var(--finance-border);
+    border-radius: 5px;
+    transition: all 0.15s;
+  }
+
+  .fin-nav-links a:hover {
+    color: var(--finance-accent);
+    border-color: var(--finance-accent);
+  }
+
+  /* ---- Alerts ---- */
+  .fin-alerts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .fin-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .fin-alert.error {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #FCA5A5;
+  }
+
+  .fin-alert.warning {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: #FCD34D;
+  }
+
+  .fin-alert a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  /* ---- KPI Cards ---- */
+  .fin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .fin-kpi-card {
+    background: var(--finance-surface);
+    border: 1px solid var(--finance-border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .fin-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .fin-kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--finance-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fin-kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .fin-kpi-value.positive { color: var(--finance-green); }
+  .fin-kpi-value.negative { color: var(--finance-red); }
+
+  .fin-kpi-change {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .fin-kpi-change.up { color: var(--finance-green); }
+  .fin-kpi-change.down { color: var(--finance-red); }
+
+  .fin-tooltip {
+    position: relative;
+    cursor: help;
+  }
+
+  .fin-tooltip .tip-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--finance-surface-2);
+    color: var(--finance-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+    font-style: normal;
+    border: 1px solid var(--finance-border);
+  }
+
+  .fin-tooltip .tip-content {
+    display: none;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E293B;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #CBD5E1;
+    width: 220px;
+    z-index: 100;
+    line-height: 1.5;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+
+  .fin-tooltip:hover .tip-content { display: block; }
+
+  /* ---- P&L Table ---- */
+  .fin-section {
+    background: var(--finance-surface);
+    border: 1px solid var(--finance-border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .fin-section-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--finance-border);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fin-pl-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .fin-pl-table tr {
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+  }
+
+  .fin-pl-table tr:last-child { border-bottom: none; }
+
+  .fin-pl-table td {
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--finance-text);
+  }
+
+  .fin-pl-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .fin-pl-row-cost td { color: var(--finance-red); }
+  .fin-pl-row-cost td:first-child { color: var(--finance-muted); font-size: 12px; padding-left: 36px; }
+
+  .fin-pl-row-subtotal {
+    background: var(--finance-surface-2);
+  }
+
+  .fin-pl-row-subtotal td {
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    color: #fff !important;
+    border-top: 1px solid var(--finance-border);
+  }
+
+  .fin-pl-row-profit td:last-child { color: var(--finance-green) !important; }
+  .fin-pl-row-loss td:last-child { color: var(--finance-red) !important; }
+
+  .fin-pl-label { color: var(--finance-muted); font-size: 12px; padding-left: 36px; }
+  .fin-pl-section-label { font-weight: 700; font-size: 13px; }
+
+  /* ---- Charts ---- */
+  .fin-charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .fin-chart-box {
+    background: var(--finance-surface);
+    border: 1px solid var(--finance-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .fin-chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--finance-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- Tables ---- */
+  .fin-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .fin-data-table th {
+    background: var(--finance-surface-2);
+    color: var(--finance-muted);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--finance-border);
+  }
+
+  .fin-data-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(51,65,85,0.4);
+    color: var(--finance-text);
+  }
+
+  .fin-data-table tr:hover td { background: rgba(99,102,241,0.06); }
+
+  .fin-data-table td:last-child,
+  .fin-data-table th:last-child { text-align: right; }
+
+  .tag-green {
+    background: rgba(16,185,129,0.15);
+    color: var(--finance-green);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .tag-red {
+    background: rgba(239,68,68,0.15);
+    color: var(--finance-red);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .tag-amber {
+    background: rgba(245,158,11,0.15);
+    color: var(--finance-amber);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ---- Operations Health ---- */
+  .fin-ops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 16px 20px;
+  }
+
+  .fin-ops-item {
+    text-align: center;
+  }
+
+  .fin-ops-label {
+    font-size: 11px;
+    color: var(--finance-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .fin-ops-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .fin-ops-value.good { color: var(--finance-green); }
+  .fin-ops-value.warn { color: var(--finance-amber); }
+  .fin-ops-value.bad  { color: var(--finance-red); }
+
+  /* ---- Two-column grid ---- */
+  .fin-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .fin-two-col, .fin-charts-grid { grid-template-columns: 1fr; }
+    .fin-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .fin-sub {
+    font-size: 11px;
+    color: var(--finance-muted);
+    margin-top: 2px;
+  }
+
+  .compare-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .compare-badge.up { background: rgba(16,185,129,0.2); color: var(--finance-green); }
+  .compare-badge.down { background: rgba(239,68,68,0.2); color: var(--finance-red); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="finance-dashboard" class="fin-page">
+
+  <!-- Header -->
+  <div class="fin-header">
+    <div class="fin-title">
+      💰 Profit &amp; Finance Dashboard
+      <span style="font-size:13px;font-weight:400;color:var(--finance-muted);">{{ date_from }} → {{ date_to }}</span>
+    </div>
+    <div class="fin-preset-bar">
+      {% for p, label in "today:Today,yesterday:Yesterday,7d:Last 7d,30d:Last 30d,this_month:This Month,last_month:Last Month"|split:"," %}
+      {% endfor %}
+      <a href="?preset=today" class="fin-preset-btn {% if preset == 'today' %}active{% endif %}">Today</a>
+      <a href="?preset=yesterday" class="fin-preset-btn {% if preset == 'yesterday' %}active{% endif %}">Yesterday</a>
+      <a href="?preset=7d" class="fin-preset-btn {% if preset == '7d' %}active{% endif %}">7 Days</a>
+      <a href="?preset=30d" class="fin-preset-btn {% if preset == '30d' %}active{% endif %}">30 Days</a>
+      <a href="?preset=this_month" class="fin-preset-btn {% if preset == 'this_month' %}active{% endif %}">This Month</a>
+      <a href="?preset=last_month" class="fin-preset-btn {% if preset == 'last_month' %}active{% endif %}">Last Month</a>
+    </div>
+    <div class="fin-nav-links">
+      <a href="{% url 'admin:finance_guide' %}">📖 Guide</a>
+      <a href="{% url 'admin:finance_breakeven' %}">🧮 Break-even</a>
+      <a href="{% url 'admin:finance_adspendentry_changelist' %}">📈 Ad Spend</a>
+      <a href="{% url 'admin:finance_operatingexpense_changelist' %}">💸 Expenses</a>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  {% if alerts %}
+  <div class="fin-alerts">
+    {% for alert in alerts %}
+    <div class="fin-alert {{ alert.level }}">
+      {% if alert.level == 'error' %}🔴{% else %}⚠️{% endif %}
+      {{ alert.message }}
+      {% if alert.action_url %}<a href="{{ alert.action_url }}">→ Fix it</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- KPI Cards Row 1 -->
+  <div class="fin-kpi-grid">
+
+    {% include "admin/finance/_kpi_card.html" with label="Net Revenue" value=summary.net_revenue prev=prev_summary.net_revenue change=changes.net_revenue prefix="Rs" tooltip="Gross Sales - Discounts - Refunds + Shipping Income + COD Fee Income, for DELIVERED orders only." %}
+
+    {% include "admin/finance/_kpi_card.html" with label="Gross Profit" value=summary.gross_profit prev=prev_summary.gross_profit change=changes.gross_profit prefix="Rs" tooltip="Net Revenue - COGS - Packaging Cost. Gross Margin = " suffix=summary.gross_margin_pct suffix_label="%" %}
+
+    {% include "admin/finance/_kpi_card.html" with label="COGS" value=summary.product_cost prev=prev_summary.product_cost change=changes.product_cost prefix="Rs" negative=True tooltip="Sum of (qty × unit_cost_snapshot) for items in delivered orders, minus restocked returns." %}
+
+    {% include "admin/finance/_kpi_card.html" with label="Ad Spend" value=summary.ad_spend prev=prev_summary.ad_spend change=changes.ad_spend prefix="Rs" negative=True tooltip="Total ad spend across all platforms (Meta, Google, TikTok) in this period." %}
+
+    {% include "admin/finance/_kpi_card.html" with label="Courier Cost" value=summary.total_courier_cost prev=prev_summary.total_courier_cost change=changes.total_courier_cost prefix="Rs" negative=True tooltip="Forward charges + COD fees + Return charges + Tax on fees, for ALL dispatched orders." %}
+
+    {% include "admin/finance/_kpi_card.html" with label="Return Loss" value=summary.return_loss prev=prev_summary.return_loss prefix="Rs" negative=True tooltip="Cost of damaged/lost returned items + extra exchange shipping + unrecovered refunds." %}
+
+    {% include "admin/finance/_kpi_card.html" with label="Op. Expenses" value=summary.operating_expenses prefix="Rs" negative=True tooltip="Salaries + Rent + Software + Content + all recurring overheads in this period." %}
+
+    <div class="fin-kpi-card" style="border-color: {% if summary.net_profit >= 0 %}var(--finance-green){% else %}var(--finance-red){% endif %}; background: linear-gradient(135deg, var(--finance-surface), var(--finance-surface-2));">
+      <div class="fin-kpi-label">
+        Net Profit
+        <span class="fin-tooltip">
+          <i class="tip-icon">i</i>
+          <span class="tip-content">Contribution Profit (after ads) – Operating Expenses. The true bottom line after ALL costs.</span>
+        </span>
+      </div>
+      <div class="fin-kpi-value {% if summary.net_profit >= 0 %}positive{% else %}negative{% endif %}">
+        Rs {{ summary.net_profit|floatformat:0 }}
+      </div>
+      <div class="fin-sub" style="color:{% if summary.net_profit >= 0 %}var(--finance-green){% else %}var(--finance-red){% endif %}">
+        {{ summary.net_margin_pct|floatformat:1 }}% margin
+      </div>
+    </div>
+
+    {% include "admin/finance/_kpi_card.html" with label="Profit/Order" value=summary.profit_per_delivered_order prefix="Rs" tooltip="Net Profit ÷ Delivered Orders" %}
+
+    <div class="fin-kpi-card">
+      <div class="fin-kpi-label">Real vs Platform ROAS
+        <span class="fin-tooltip"><i class="tip-icon">i</i>
+          <span class="tip-content">Real ROAS = Net Revenue (delivered) ÷ Ad Spend. Platform ROAS = platform-reported purchase value ÷ Ad Spend. Platform is always higher because it counts orders that cancel or return.</span>
+        </span>
+      </div>
+      <div class="fin-kpi-value" style="font-size:18px;">
+        <span style="color:var(--finance-green);">{{ summary.real_roas|floatformat:2 }}x</span>
+        <span style="color:var(--finance-muted);font-size:12px;font-weight:400;"> real</span>
+      </div>
+      <div class="fin-sub">Platform: <strong style="color:var(--finance-amber);">{{ summary.platform_roas|floatformat:2 }}x</strong>
+        | Break-even: {{ summary.break_even_roas|floatformat:2 }}x
+      </div>
+    </div>
+
+    <div class="fin-kpi-card">
+      <div class="fin-kpi-label">Real CPA
+        <span class="fin-tooltip"><i class="tip-icon">i</i>
+          <span class="tip-content">Ad Spend ÷ Delivered Orders. The true cost to acquire each paying customer. Break-even CPA = contribution profit per order before ads.</span>
+        </span>
+      </div>
+      <div class="fin-kpi-value">Rs {{ summary.real_cpa|floatformat:0 }}</div>
+      <div class="fin-sub">Break-even: Rs {{ summary.break_even_cpa|floatformat:0 }}</div>
+    </div>
+
+  </div>
+
+  <!-- P&L Statement -->
+  <div class="fin-section">
+    <div class="fin-section-header">📊 Profit &amp; Loss Statement
+      <span style="font-size:11px;color:var(--finance-muted);font-weight:400;">{{ date_from }} – {{ date_to }} | Delivery-date basis</span>
+    </div>
+    <table class="fin-pl-table">
+      <tr>
+        <td class="fin-pl-section-label">Gross Sales</td>
+        <td><a href="{% url 'admin:orders_order_changelist' %}?status__exact=delivered" style="color:inherit;">Rs {{ summary.gross_sales|floatformat:0 }}</a></td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Discounts</td>
+        <td>Rs {{ summary.discount_total|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Refunds</td>
+        <td>Rs {{ summary.refund_total|floatformat:0 }}</td>
+      </tr>
+      <tr>
+        <td class="fin-pl-label">+ Shipping &amp; COD fee income</td>
+        <td>Rs {{ summary.shipping_income|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-subtotal">
+        <td>= NET REVENUE</td>
+        <td>Rs {{ summary.net_revenue|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Cost of goods sold (COGS)</td>
+        <td>Rs {{ summary.product_cost|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Packaging</td>
+        <td>Rs {{ summary.packaging_cost|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-subtotal fin-pl-row-profit">
+        <td>= GROSS PROFIT</td>
+        <td>Rs {{ summary.gross_profit|floatformat:0 }} ({{ summary.gross_margin_pct|floatformat:1 }}%)</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Courier forward charges</td>
+        <td>Rs {{ summary.courier_forward|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Courier COD fees</td>
+        <td>Rs {{ summary.courier_cod_fee|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Courier return charges</td>
+        <td>Rs {{ summary.courier_return|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Payment gateway fees</td>
+        <td>Rs {{ summary.payment_gateway_fee|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Return &amp; damage losses</td>
+        <td>Rs {{ summary.return_loss|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-subtotal {% if summary.contribution_profit_before_ads >= 0 %}fin-pl-row-profit{% else %}fin-pl-row-loss{% endif %}">
+        <td>= CONTRIBUTION PROFIT (before ads)</td>
+        <td>Rs {{ summary.contribution_profit_before_ads|floatformat:0 }} ({{ summary.contrib_margin_pct|floatformat:1 }}%)</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Ad Spend (Meta / Google / Other)</td>
+        <td><a href="{% url 'admin:finance_adspendentry_changelist' %}" style="color:inherit;">Rs {{ summary.ad_spend|floatformat:0 }}</a></td>
+      </tr>
+      <tr class="fin-pl-row-subtotal {% if summary.contribution_profit >= 0 %}fin-pl-row-profit{% else %}fin-pl-row-loss{% endif %}">
+        <td>= CONTRIBUTION PROFIT (after ads)</td>
+        <td>Rs {{ summary.contribution_profit|floatformat:0 }}</td>
+      </tr>
+      <tr class="fin-pl-row-cost">
+        <td class="fin-pl-label">− Operating Expenses</td>
+        <td><a href="{% url 'admin:finance_operatingexpense_changelist' %}" style="color:inherit;">Rs {{ summary.operating_expenses|floatformat:0 }}</a></td>
+      </tr>
+      <tr class="fin-pl-row-subtotal {% if summary.net_profit >= 0 %}fin-pl-row-profit{% else %}fin-pl-row-loss{% endif %}" style="font-size:16px;">
+        <td>= NET PROFIT</td>
+        <td>Rs {{ summary.net_profit|floatformat:0 }} ({{ summary.net_margin_pct|floatformat:1 }}%)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Charts -->
+  <div class="fin-charts-grid">
+    <div class="fin-chart-box">
+      <div class="fin-chart-title">📈 Daily Revenue, Ad Spend &amp; Profit Trend</div>
+      <canvas id="trendChart" style="height:220px;"></canvas>
+    </div>
+    <div class="fin-chart-box">
+      <div class="fin-chart-title">🛒 Order Funnel</div>
+      <canvas id="funnelChart" style="height:220px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Operations Health -->
+  <div class="fin-section" style="margin-bottom:20px;">
+    <div class="fin-section-header">🔍 Operations Health</div>
+    <div class="fin-ops-grid">
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">Delivery Success</div>
+        <div class="fin-ops-value {% if summary.delivery_success_rate >= 75 %}good{% elif summary.delivery_success_rate >= 60 %}warn{% else %}bad{% endif %}">
+          {{ summary.delivery_success_rate|floatformat:1 }}%
+        </div>
+      </div>
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">Return Rate</div>
+        <div class="fin-ops-value {% if summary.return_rate <= 10 %}good{% elif summary.return_rate <= 20 %}warn{% else %}bad{% endif %}">
+          {{ summary.return_rate|floatformat:1 }}%
+        </div>
+      </div>
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">RTO Rate</div>
+        <div class="fin-ops-value {% if summary.rto_rate <= 15 %}good{% elif summary.rto_rate <= 25 %}warn{% else %}bad{% endif %}">
+          {{ summary.rto_rate|floatformat:1 }}%
+        </div>
+      </div>
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">Cancellation Rate</div>
+        <div class="fin-ops-value {% if summary.cancellation_rate <= 5 %}good{% elif summary.cancellation_rate <= 15 %}warn{% else %}bad{% endif %}">
+          {{ summary.cancellation_rate|floatformat:1 }}%
+        </div>
+      </div>
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">Orders Delivered</div>
+        <div class="fin-ops-value">{{ summary.orders_delivered }}</div>
+      </div>
+      <div class="fin-ops-item">
+        <div class="fin-ops-label">Orders Placed</div>
+        <div class="fin-ops-value">{{ summary.orders_placed }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column tables -->
+  <div class="fin-two-col">
+
+    <!-- By Campaign -->
+    <div class="fin-section">
+      <div class="fin-section-header">📣 Performance by Ad Campaign</div>
+      <div style="overflow:auto;">
+        <table class="fin-data-table">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Platform</th>
+              <th>Spend (Rs)</th>
+              <th>Platform ROAS</th>
+              <th>Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in by_campaign %}
+            <tr>
+              <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ c.campaign }}">{{ c.campaign|default:"(All)" }}</td>
+              <td><span class="{% if c.platform == 'meta' %}tag-green{% else %}tag-amber{% endif %}">{{ c.platform|upper }}</span></td>
+              <td>{{ c.spend|floatformat:0 }}</td>
+              <td>
+                {% if c.spend %}
+                  {% with roas=c.platform_value|default:0 %}
+                  <span class="{% if roas >= c.spend|floatformat:0 %}tag-green{% else %}tag-red{% endif %}">
+                    {{ c.platform_value|floatformat:0|default:0 }}
+                  </span>
+                  {% endwith %}
+                {% else %}–{% endif %}
+              </td>
+              <td>{{ c.clicks }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;color:var(--finance-muted);padding:20px;">No ad spend data for this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- By Courier -->
+    <div class="fin-section">
+      <div class="fin-section-header">🚚 Performance by Courier</div>
+      <div style="overflow:auto;">
+        <table class="fin-data-table">
+          <thead>
+            <tr>
+              <th>Courier</th>
+              <th>Orders</th>
+              <th>Delivered</th>
+              <th>Returned</th>
+              <th>Courier Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in by_courier %}
+            <tr>
+              <td><strong>{{ c.courier|default:"Unknown"|upper }}</strong></td>
+              <td>{{ c.orders }}</td>
+              <td>
+                {% if c.orders %}
+                  <span class="tag-green">{{ c.delivered }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.returned %}
+                  <span class="tag-red">{{ c.returned }}</span>
+                {% else %}0{% endif %}
+              </td>
+              <td>Rs {{ c.total_courier_cost|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;color:var(--finance-muted);padding:20px;">No courier data.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- By City -->
+  <div class="fin-section" style="margin-bottom:20px;">
+    <div class="fin-section-header">🏙️ Profitability by City (Top 10)</div>
+    <div style="overflow:auto;">
+      <table class="fin-data-table">
+        <thead>
+          <tr>
+            <th>City</th>
+            <th>Orders</th>
+            <th>Delivered</th>
+            <th>Returned</th>
+            <th>Net Revenue</th>
+            <th>Contribution Profit</th>
+            <th>Return Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for city in by_city %}
+          <tr>
+            <td><strong>{{ city.shipping_city|default:"Unknown" }}</strong></td>
+            <td>{{ city.orders }}</td>
+            <td>{{ city.delivered }}</td>
+            <td>{{ city.returned }}</td>
+            <td>Rs {{ city.net_revenue|floatformat:0 }}</td>
+            <td>
+              {% if city.contribution_profit >= 0 %}
+              <span class="tag-green">Rs {{ city.contribution_profit|floatformat:0 }}</span>
+              {% else %}
+              <span class="tag-red">Rs {{ city.contribution_profit|floatformat:0 }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if city.orders %}
+                {% widthratio city.returned city.orders 100 %}%
+              {% else %}–{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" style="text-align:center;color:var(--finance-muted);padding:20px;">No order data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cash View -->
+  <div class="fin-section" style="margin-bottom:20px;">
+    <div class="fin-section-header">💵 Cash View</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;padding:16px 20px;">
+      <div>
+        <div class="fin-ops-label">COD Receivable (Total)</div>
+        <div style="font-size:22px;font-weight:800;color:var(--finance-amber);">Rs {{ cash.total_cod_receivable|floatformat:0 }}</div>
+        <div class="fin-sub">Delivered but not yet settled</div>
+      </div>
+      <div>
+        <div class="fin-ops-label">Cash Received (Period)</div>
+        <div style="font-size:22px;font-weight:800;color:var(--finance-green);">Rs {{ cash.cash_received|floatformat:0 }}</div>
+        <div class="fin-sub">From courier settlements</div>
+      </div>
+      <div>
+        <div class="fin-ops-label">Cash Out (Period)</div>
+        <div style="font-size:22px;font-weight:800;color:var(--finance-red);">Rs {{ cash.cash_out|floatformat:0 }}</div>
+        <div class="fin-sub">Ads + Expenses</div>
+      </div>
+      <div>
+        <div class="fin-ops-label">Net Cash Movement</div>
+        <div style="font-size:22px;font-weight:800;color:{% if cash.net_cash_movement >= 0 %}var(--finance-green){% else %}var(--finance-red){% endif %};">
+          Rs {{ cash.net_cash_movement|floatformat:0 }}
+        </div>
+      </div>
+    </div>
+
+    {% if cash.cod_receivable_by_courier %}
+    <div style="padding:0 20px 16px;">
+      <table class="fin-data-table" style="max-width:500px;">
+        <thead><tr><th>Courier</th><th>Orders</th><th>COD Receivable</th></tr></thead>
+        <tbody>
+          {% for r in cash.cod_receivable_by_courier %}
+          <tr>
+            <td>{{ r.courier|upper }}</td>
+            <td>{{ r.order_count }}</td>
+            <td style="color:var(--finance-amber);">Rs {{ r.cod_receivable|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const trend = {{ daily_trend_json|safe }};
+
+  // Trend Chart
+  const trendCtx = document.getElementById('trendChart');
+  if (trendCtx && trend.length) {
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: trend.map(r => r.date),
+        datasets: [
+          {
+            label: 'Net Revenue',
+            data: trend.map(r => r.net_revenue),
+            borderColor: '#6366F1',
+            backgroundColor: 'rgba(99,102,241,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 2,
+          },
+          {
+            label: 'Ad Spend',
+            data: trend.map(r => r.ad_spend),
+            borderColor: '#F59E0B',
+            backgroundColor: 'rgba(245,158,11,0.05)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 2,
+          },
+          {
+            label: 'Net Profit',
+            data: trend.map(r => r.net_profit),
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16,185,129,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 2,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#94A3B8', font: { size: 11 } } },
+        },
+        scales: {
+          x: { ticks: { color: '#64748B', font: { size: 10 }, maxTicksLimit: 10 }, grid: { color: '#1E293B' } },
+          y: { ticks: { color: '#64748B', font: { size: 10 }, callback: v => 'Rs ' + (v/1000).toFixed(0) + 'K' }, grid: { color: '#1E293B' } },
+        }
+      }
+    });
+  }
+
+  // Funnel Chart
+  const funnelCtx = document.getElementById('funnelChart');
+  const funnelData = {
+    labels: ['Placed', 'Confirmed', 'Dispatched', 'Delivered', 'Returned', 'Cancelled'],
+    values: [
+      {{ summary.orders_placed }}, {{ summary.orders_confirmed }},
+      {{ summary.orders_dispatched }}, {{ summary.orders_delivered }},
+      {{ summary.orders_returned }}, {{ summary.orders_cancelled }}
+    ],
+    colors: ['#6366F1','#3B82F6','#06B6D4','#10B981','#EF4444','#64748B'],
+  };
+
+  if (funnelCtx) {
+    new Chart(funnelCtx, {
+      type: 'bar',
+      data: {
+        labels: funnelData.labels,
+        datasets: [{
+          data: funnelData.values,
+          backgroundColor: funnelData.colors,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94A3B8', font: { size: 11 } }, grid: { display: false } },
+          y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#1E293B' } },
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

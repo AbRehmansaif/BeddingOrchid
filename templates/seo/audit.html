@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}SEO Audit Report | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-serif font-bold text-navy mb-8">SEO Metadata Health Audit</h1>
+
+    <div class="space-y-8">
+        <div class="bg-white p-6 rounded-2xl border border-stone-200">
+            <h2 class="font-bold text-lg text-navy mb-4">Products Missing Custom Meta Title</h2>
+            {% if products_missing_meta %}
+            <ul class="divide-y divide-stone-100 text-xs">
+                {% for p in products_missing_meta %}
+                <li class="py-2 flex justify-between">
+                    <span>{{ p.name }}</span>
+                    <a href="{% url 'admin:catalog_product_change' p.id %}" target="_blank" class="text-terracotta underline">Edit in Admin &rarr;</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-xs text-emerald-700 font-bold">✓ All active products have SEO titles generated or filled.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
