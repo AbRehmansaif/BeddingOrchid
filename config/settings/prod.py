@@ -14,13 +14,20 @@ ALLOWED_HOSTS = env.list(
 )
 
 # PostgreSQL Database Configuration for Production
-# Out-of-the-box pre-configured with dedicated user & database on VPS
-DATABASES = {
-    'default': env.db(
-        'DATABASE_URL',
-        default='postgres://beddingorchid_user:YourStrongSecretPassword123!@localhost:5432/beddingorchid_db'
-    )
-}
+# Supports both DATABASE_URL and individual DB_PASSWORD / DB_USER / DB_NAME
+if env('DATABASE_URL', default=None) and 'postgres' in env('DATABASE_URL'):
+    DATABASES = {'default': env.db('DATABASE_URL')}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_NAME', default='beddingorchid_db'),
+            'USER': env('DB_USER', default='beddingorchid_user'),
+            'PASSWORD': env('DB_PASSWORD', default='YourStrongSecretPassword123!'),
+            'HOST': env('DB_HOST', default='localhost'),
+            'PORT': env.int('DB_PORT', default=5432),
+        }
+    }
 DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=600)
 
 # CSRF Trusted Origins (Mandatory for Django 4.0+ HTTPS behind Nginx reverse proxy)
