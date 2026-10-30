@@ -39,9 +39,13 @@ class Category(MPTTModel, TimeStampedModel):
         if not self.slug:
             self.slug = slugify(self.name)
         if not self.meta_title:
-            self.meta_title = f"{self.name} - Luxury Bedding | BeddingOrchid"
+            self.meta_title = f"{self.name} | BeddingOrchid"[:120]
+        else:
+            self.meta_title = self.meta_title[:120]
         if not self.meta_description:
-            self.meta_description = f"Shop premium {self.name.lower()} online in Pakistan. Experience unmatched softness, vibrant colors, and fast cash on delivery delivery."
+            self.meta_description = f"Shop premium {self.name.lower()} online in Pakistan with fast Cash on Delivery."[:200]
+        else:
+            self.meta_description = self.meta_description[:200]
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -142,10 +146,17 @@ class Product(TimeStampedModel):
         if not self.slug:
             self.slug = slugify(self.name)
         if not self.meta_title:
-            self.meta_title = f"{self.name} | Premium Bedding in Pakistan"
+            self.meta_title = f"{self.name} | BeddingOrchid"[:150]
+        else:
+            self.meta_title = self.meta_title[:150]
+
         if not self.meta_description:
-            desc = self.short_description or self.description[:150]
-            self.meta_description = f"Buy {self.name} online. {desc[:120]}... Cash on delivery & fast nationwide shipping."
+            desc = (self.short_description or self.description or "")[:80]
+            auto_desc = f"Buy {self.name} online. {desc} Nationwide Cash on Delivery."
+            self.meta_description = auto_desc[:220]
+        else:
+            self.meta_description = self.meta_description[:220]
+
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
