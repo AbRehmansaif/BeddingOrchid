@@ -12,8 +12,9 @@ VENV_DIR="$APP_DIR/.venv"
 LOG_DIR="/var/log/beddingorchid"
 RUN_DIR="/run/beddingorchid"
 
-echo "=== [1/7] Navigating to Application Directory ==="
+echo "=== [1/8] Navigating to Application Directory & Pulling Latest Code ==="
 cd "$APP_DIR"
+git pull origin main
 
 echo "=== [2/7] Ensuring Runtime and Log Directories Exist ==="
 mkdir -p "$LOG_DIR" "$RUN_DIR" "$APP_DIR/media" "$APP_DIR/staticfiles"
