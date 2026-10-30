@@ -1,10 +1,10 @@
 <!-- Top Announcement & Quick Utility Bar -->
-<div class="bg-navy text-stone-200 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-navy/40">
+<div class="bg-navy text-stone-200 text-xs py-1.5 sm:py-2 px-2 sm:px-6 lg:px-8 border-b border-navy/40">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <!-- Announcement Message -->
-        <div class="flex-1 text-center sm:text-left text-[11px] sm:text-xs font-medium tracking-wide flex items-center justify-center sm:justify-start space-x-2">
-            <span class="inline-block w-1.5 h-1.5 rounded-full bg-terracotta animate-pulse"></span>
-            <span>{{ site_settings.announcement_bar_text|default:"✨ Complimentary Shipping Across Pakistan on Orders Over Rs. 4,000 • Cash on Delivery Available" }}</span>
+        <div class="flex-1 text-center sm:text-left text-[10px] sm:text-xs font-medium tracking-wide flex items-center justify-center sm:justify-start space-x-1.5 sm:space-x-2 px-1">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-terracotta animate-pulse shrink-0"></span>
+            <span class="truncate sm:whitespace-normal">{{ site_settings.announcement_bar_text|default:"✨ Free Nationwide Delivery Over Rs. 4,000 • Cash on Delivery Available" }}</span>
             {% if site_settings.announcement_bar_link %}
             <a href="{{ site_settings.announcement_bar_link }}" class="text-terracotta hover:underline font-semibold ml-1 hidden md:inline">Shop Now &rarr;</a>
             {% endif %}
@@ -42,13 +42,13 @@
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/90 shadow-[0_2px_15px_rgba(0,0,0,0.03)] transition-all duration-200">
     
     <!-- Top Branding & Search Row -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16 sm:h-20 gap-4 lg:gap-8">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-14 sm:h-20 gap-2 sm:gap-4 lg:gap-8">
             
             <!-- Left: Mobile Menu Toggle & Brand Logo -->
-            <div class="flex items-center space-x-3 shrink-0">
+            <div class="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
                 <!-- Mobile Menu Toggle Button -->
-                <button type="button" id="mobileMenuToggle" onclick="toggleMobileMenu()" class="lg:hidden p-2 -ml-2 text-stone-700 hover:text-terracotta focus:outline-none transition rounded-lg hover:bg-stone-50" aria-label="Toggle menu" aria-expanded="false">
+                <button type="button" id="mobileMenuToggle" onclick="toggleMobileMenu()" class="lg:hidden p-1.5 -ml-1 text-stone-700 hover:text-terracotta focus:outline-none transition rounded-lg hover:bg-stone-50" aria-label="Toggle menu" aria-expanded="false">
                     <svg id="menuIconOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -59,9 +59,9 @@
 
                 <!-- Brand Logo (Left on Desktop) -->
                 <a href="{% url 'catalog:home' %}" class="flex flex-col items-start group py-1" aria-label="BeddingOrchid Home">
-                    <div class="flex items-center space-x-2.5">
+                    <div class="flex items-center space-x-1.5 sm:space-x-2.5">
                         <!-- Luxury Bedding & Orchid Emblem Icon -->
-                        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 shrink-0">
+                        <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 shrink-0">
                             <svg class="w-full h-full" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <linearGradient id="headerBadgeNavy" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -104,11 +104,11 @@
                             </svg>
                         </span>
                         <!-- Brand Name -->
-                        <span class="text-2xl sm:text-3xl font-serif font-bold text-navy tracking-tight group-hover:text-stone-900 transition leading-none">
+                        <span class="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-navy tracking-tight group-hover:text-stone-900 transition leading-none">
                             Bedding<span class="text-terracotta">Orchid</span>
                         </span>
                     </div>
-                    <span class="text-[9px] sm:text-[10px] tracking-[0.24em] text-stone-500 uppercase font-semibold mt-1">
+                    <span class="hidden sm:block text-[9px] sm:text-[10px] tracking-[0.24em] text-stone-500 uppercase font-semibold mt-1">
                         Luxury Home Textiles &bull; Pakistan
                     </span>
                 </a>
@@ -130,16 +130,16 @@
             </div>
 
             <!-- Right: Action Icons (Search on mobile, Account, Wishlist, Cart) -->
-            <div class="flex items-center justify-end space-x-1 sm:space-x-3 shrink-0">
+            <div class="flex items-center justify-end space-x-1 sm:space-x-3 shrink-0 pr-1">
                 <!-- Mobile Search Trigger Button -->
-                <button type="button" onclick="toggleMobileSearch()" class="lg:hidden p-2 text-stone-700 hover:text-terracotta transition rounded-lg hover:bg-stone-50" aria-label="Open search">
+                <button type="button" onclick="toggleMobileSearch()" class="lg:hidden p-1.5 text-stone-700 hover:text-terracotta transition rounded-lg hover:bg-stone-50" aria-label="Open search">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </button>
 
                 <!-- Customer Account -->
-                <a href="{% url 'accounts:profile' %}" class="text-stone-700 hover:text-terracotta transition p-2 rounded-lg hover:bg-stone-50 relative group" title="My Account">
+                <a href="{% url 'accounts:profile' %}" class="text-stone-700 hover:text-terracotta transition p-1.5 sm:p-2 rounded-lg hover:bg-stone-50 relative group" title="My Account">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -149,7 +149,7 @@
                 </a>
 
                 <!-- Wishlist -->
-                <a href="{% url 'accounts:wishlist' %}" class="text-stone-700 hover:text-terracotta transition p-2 rounded-lg hover:bg-stone-50 relative hidden sm:block group" title="Favourites">
+                <a href="{% url 'accounts:wishlist' %}" class="text-stone-700 hover:text-terracotta transition p-1.5 sm:p-2 rounded-lg hover:bg-stone-50 relative hidden sm:block group" title="Favourites">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
@@ -159,12 +159,12 @@
                 </a>
 
                 <!-- Shopping Bag Button -->
-                <button type="button" onclick="toggleMiniCart()" class="text-stone-800 hover:text-terracotta transition p-2 rounded-xl hover:bg-stone-50 flex items-center space-x-1.5 relative group" aria-label="Open Shopping Bag">
+                <button type="button" onclick="toggleMiniCart()" class="text-stone-800 hover:text-terracotta transition p-1.5 sm:p-2 rounded-xl hover:bg-stone-50 flex items-center space-x-1.5 relative group" aria-label="Open Shopping Bag">
                     <div class="relative">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6 text-navy group-hover:text-terracotta transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <span class="cart-count-badge absolute -top-1.5 -right-2 bg-terracotta text-white text-[10px] font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-sm {% if not cart_count %}hidden{% endif %}">
+                        <span class="cart-count-badge absolute -top-1 -right-1 bg-terracotta text-white text-[9px] sm:text-[10px] font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-sm {% if not cart_count %}hidden{% endif %}">
                             {{ cart_count|default:0 }}
                         </span>
                     </div>
@@ -173,6 +173,8 @@
                     </span>
                 </button>
             </div>
+        </div>
+    </div>
         </div>
     </div>
 
