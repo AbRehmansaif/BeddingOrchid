@@ -12,6 +12,14 @@
     <link rel="alternate icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
     
+    <!-- PWA Web App Manifest & Mobile App Capabilities -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1E293B">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BeddingOrchid">
+    
     <!-- Canonical link -->
     <link rel="canonical" href="{% block canonical_url %}https://{{ request.get_host }}{{ request.path }}{% endblock %}">
 
@@ -371,6 +379,21 @@
             .catch(err => {
                 console.error('Wishlist toggle error:', err);
                 showToast('Connection error. Please try again.', 'error');
+            });
+        }
+    </script>
+
+    <!-- PWA Progressive Web App Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(function(registration) {
+                        console.log('BeddingOrchid PWA registered with scope:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.warn('PWA service worker registration failed:', error);
+                    });
             });
         }
     </script>
