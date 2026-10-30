@@ -7,7 +7,8 @@ Type=forking
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/beddingorchid
-EnvironmentFile=/var/www/beddingorchid/.env
+RuntimeDirectory=beddingorchid
+EnvironmentFile=-/var/www/beddingorchid/.env
 ExecStart=/var/www/beddingorchid/.venv/bin/celery multi start worker1 \
     -A config.celery:app \
     --pidfile=/run/beddingorchid/celery-%n.pid \

@@ -1,21 +1,22 @@
 [Unit]
 Description=BeddingOrchid Gunicorn WSGI Application Service
-After=network.target postgresql.service redis.service
-Requires=postgresql.service
+After=network.target postgresql.service
 
 [Service]
-Type=notify
+Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/beddingorchid
-EnvironmentFile=/var/www/beddingorchid/.env
+RuntimeDirectory=beddingorchid
+Environment="HOME=/var/www/beddingorchid"
+EnvironmentFile=-/var/www/beddingorchid/.env
 ExecStart=/var/www/beddingorchid/.venv/bin/gunicorn \
     --workers 3 \
     --threads 2 \
     --worker-class gthread \
     --worker-tmp-dir /dev/shm \
-    --bind unix:/run/beddingorchid.sock \
-    --umask 007 \
+    --bind unix:/run/beddingorchid/beddingorchid.sock \
+    --umask 000 \
     --timeout 60 \
     --access-logfile - \
     --error-logfile - \
@@ -30,4 +31,3 @@ RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
-

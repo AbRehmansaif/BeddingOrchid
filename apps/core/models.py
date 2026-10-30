@@ -55,15 +55,24 @@ class SiteSettings(TimeStampedModel):
     def save(self, *args, **kwargs):
         self.pk = 1
         super().save(*args, **kwargs)
-        cache.set('site_settings_instance', self, timeout=86400)
+        try:
+            cache.set('site_settings_instance', self, timeout=86400)
+        except Exception:
+            pass
 
     @classmethod
     def get_settings(cls):
-        cached = cache.get('site_settings_instance')
-        if cached:
-            return cached
+        try:
+            cached = cache.get('site_settings_instance')
+            if cached:
+                return cached
+        except Exception:
+            pass
         instance, _ = cls.objects.get_or_create(pk=1)
-        cache.set('site_settings_instance', instance, timeout=86400)
+        try:
+            cache.set('site_settings_instance', instance, timeout=86400)
+        except Exception:
+            pass
         return instance
 
     def __str__(self):
